@@ -1,4 +1,4 @@
-module LK where
+module Logic-in-IS where
 
 -- 情報科学における論理 in Agda
 -- http://www.nippyo.co.jp/book/1292.html
