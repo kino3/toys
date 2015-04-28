@@ -8,16 +8,15 @@ module LK where
 open import Data.Char
 open import Data.String using (String)
 
-data Bool : Set where
-  t f : Bool
+data 真偽値 : Set where
+  真 偽 : 真偽値
 
 record 命題変数 : Set where
-  constructor _,_
   field
-    Label : Char
-    真偽 : Bool
-    --{文} : String
+    真偽 : 真偽値
     -- 命題変数を具体的にひとつ定義した時点で、真偽もきまっている、という立場。
+    -- Labelについては、命題変数を具体的にひとつ定義した時点の名前とするのが自然なので、ここでは定義しない。
+    -- そうすることで、名前の重複チェックをAgdaの検査に還元できる。
 
 -- 定義1.1
 
@@ -31,12 +30,19 @@ data 論理式 : Set where
 infix 100 ¬_
 
 -- 例1.1
-sample1 : 論理式
-sample1 = < 'p' , {!!} > ⊃ (< 'q' , {!!} > ∨ ¬ < 'r' , {!!} >)
--- 特にp,q,rに真偽は定めていない。しかし、みづらい。。。
+sample1 : (p q r : 命題変数) → 論理式
+sample1 p q r = < p > ⊃ ( < q > ∨ ¬ < r >)
+-- 特にp,q,rに真偽は定めていない。
+
+data Bool : Set where
+  t f : Bool
+
+taiou : 真偽値 → Bool
+taiou 真 = t
+taiou 偽 = f
 
 付値 : 論理式 → Bool
-付値 (< x >) = 命題変数.真偽 x
+付値 (< x >) = taiou (命題変数.真偽 x) 
 付値 (A ∧ B) with 付値 A | 付値 B
 付値 (A ∧ B) | t | t = t
 付値 (A ∧ B) | t | f = f
@@ -56,18 +62,23 @@ sample1 = < 'p' , {!!} > ⊃ (< 'q' , {!!} > ∨ ¬ < 'r' , {!!} >)
 付値 (¬ A) | t = f
 付値 (¬ A) | f = t
 
-open import Relation.Binary.Core
+v[_] : 論理式 → Bool
+v[ x ] = 付値 x  
 
-_はトートロジーである : 論理式 → Set
-A はトートロジーである = 付値 A ≡ t
+open import Relation.Binary.Core renaming (_≡_ to _≈_)
 
-_は恒真である : 論理式 → Set
-A は恒真である = A はトートロジーである
+_は_である : 論理式 → (論理式 → Set) → Set
+a は P である = P a
+
+トートロジー : 論理式 → Set
+トートロジー A = 付値 A ≈ t
+
+恒真 = トートロジー
 
 -- 定理1.1
 
 -- 例1.3
-ex1-3 : ∀ p q → ((p ∧ (p ⊃ q)) ⊃ q ) はトートロジーである
+ex1-3 : ∀ p q → ((p ∧ (p ⊃ q)) ⊃ q ) は トートロジー である
 ex1-3 p q with 付値 p | 付値 q
 ex1-3 p q | t | t = refl
 ex1-3 p q | t | f = refl
