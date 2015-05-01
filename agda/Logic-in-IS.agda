@@ -23,27 +23,46 @@ infix 100 ¬_
 sample1 : (p q r : 命題変数) → 論理式
 sample1 p q r = < p > ⊃ ( < q > ∨ ¬ < r >)
 
-data Bool : Set where
-  t f : Bool
+open import Data.Bool 
+  renaming (true to t; false to f;_∧_ to _and_;_∨_ to _or_)
+--data Bool : Set where
+--  t f : Bool
 
 命題変数の付値 : Set
 命題変数の付値 = 命題変数 → Bool
 
-hoge : 命題変数の付値
-hoge x = t
-
-付値 : Set
+付値 : Set -- 論理式へ拡張
 付値 = 論理式 → Bool
 
 open import Relation.Binary.Core renaming (_≡_ to _≈_)
+-- ≡はあとで定義したいのでrenameする。
+
+postulate
+  hana : (v : 付値) (A B : 論理式) → v(A) ≈ t → v(B) ≈ t → v(A ∧ B) ≈ t
+
+
 トートロジー : 論理式 → Set
-トートロジー A = ∀ (v : 付値) → v A ≈ t
+トートロジー A = ∀ (v : 付値) → v(A) ≈ t
 
 _は_である : 論理式 → (論理式 → Set) → Set
 a は P である = P a
 
 恒真 = トートロジー
 
+
+{-
+
+_≡_ : {v : 付値} → Decidable {A = 論理式} _≈_
+< x > ≡ b = {!!}
+_≡_ {v} (A ∧ B) b with v(A) | v(B)
+(A ∧ B) ≡ b | t | t = yes {!!}
+(A ∧ B) ≡ b | t | f = {!!}
+(A ∧ B) ≡ b | f | y = {!!}
+(a ∨ a₁) ≡ b = {!!}
+(a ⊃ a₁) ≡ b = {!!}
+¬ a ≡ b = {!!}
+-}
+-- v(A ∧ B) ≈ v(A) and v(B)
 
 {-
 付値 (< x >) = 命題変数の付値 ?
