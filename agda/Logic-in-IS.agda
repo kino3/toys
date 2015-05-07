@@ -28,65 +28,43 @@ open import Data.Bool
 --data Bool : Set where
 --  t f : Bool
 
-命題変数の付値 : Set
-命題変数の付値 = 命題変数 → Bool
+付値 : Set
+付値 = 命題変数 → Bool
 
-付値 : Set -- 論理式へ拡張
-付値 = 論理式 → Bool
+-- 論理式の付値をさだめるときは、暗黙的に命題変数の付値がなにかしら決まっている世界を考えている。
+-- そのため、{v : 付値} がある。これがないと< x >のときを定義できない。
+論理式付値 : {v : 付値} → 論理式 → Bool
+論理式付値 {v} < x > = v x
+論理式付値 {v} (A ∧ B) with 論理式付値 {v} A | 論理式付値 {v} B
+... | t | t = t
+... | t | f = f
+... | f | t = f
+... | f | f = f
+論理式付値 {v} (A ∨ B) with 論理式付値 {v} A | 論理式付値 {v} B
+... | t | t = t
+... | t | f = t
+... | f | t = t
+... | f | f = f
+論理式付値 {v} (A ⊃ B) with 論理式付値 {v} A | 論理式付値 {v} B
+... | t | t = t
+... | t | f = f
+... | f | t = t
+... | f | f = t
+論理式付値 {v} (¬ A) with 論理式付値 {v} A
+... | t = f
+... | f = t
 
 open import Relation.Binary.Core renaming (_≡_ to _≈_)
 -- ≡はあとで定義したいのでrenameする。
 
-postulate
-  hana : (v : 付値) (A B : 論理式) → v(A) ≈ t → v(B) ≈ t → v(A ∧ B) ≈ t
 
-
-トートロジー : 論理式 → Set
-トートロジー A = ∀ (v : 付値) → v(A) ≈ t
+トートロジー : {v : 付値} → 論理式 → Set
+トートロジー {v} A = 論理式付値 {v} A ≈ t
 
 _は_である : 論理式 → (論理式 → Set) → Set
 a は P である = P a
 
 恒真 = トートロジー
-
-
-{-
-
-_≡_ : {v : 付値} → Decidable {A = 論理式} _≈_
-< x > ≡ b = {!!}
-_≡_ {v} (A ∧ B) b with v(A) | v(B)
-(A ∧ B) ≡ b | t | t = yes {!!}
-(A ∧ B) ≡ b | t | f = {!!}
-(A ∧ B) ≡ b | f | y = {!!}
-(a ∨ a₁) ≡ b = {!!}
-(a ⊃ a₁) ≡ b = {!!}
-¬ a ≡ b = {!!}
--}
--- v(A ∧ B) ≈ v(A) and v(B)
-
-{-
-付値 (< x >) = 命題変数の付値 ?
-付値 (A ∧ B) with 付値 A | 付値 B
-付値 (A ∧ B) | t | t = t
-付値 (A ∧ B) | t | f = f
-付値 (A ∧ B) | f | t = f
-付値 (A ∧ B) | f | f = f
-付値 (A ∨ B) with 付値 A | 付値 B
-付値 (A ∨ B) | t | t = t
-付値 (A ∨ B) | t | f = t
-付値 (A ∨ B) | f | t = t
-付値 (A ∨ B) | f | f = f
-付値 (A ⊃ B) with 付値 A | 付値 B
-付値 (A ⊃ B) | t | t = t
-付値 (A ⊃ B) | t | f = f
-付値 (A ⊃ B) | f | t = t
-付値 (A ⊃ B) | f | f = t
-付値 (¬ A) with 付値 A
-付値 (¬ A) | t = f
-付値 (¬ A) | f = t
--}
-
--- 特にp,q,rに真偽は定めていない。
 
 -- 定理1.1
 -- 与えられた論理式がトートロジーか否かは決定可能である。
@@ -95,26 +73,21 @@ thm1-1 : {A : 論理式} → Decidable (A は トートロジー である)
 thm1-1 = {!!}
 -}
 
-
+_の付値 : {v : 付値} → 論理式 → Bool
+_の付値 {v} A = 論理式付値 {v} A
 -- 例1.3
-ex1-3 : ∀ p q → ((p ∧ (p ⊃ q)) ⊃ q ) は トートロジー である
-ex1-3 p q v with v p | v q
-ex1-3 p q v | t | t = {!!}
-ex1-3 p q v | t | f = {!!}
-ex1-3 p q v | f | t = {!!}
-ex1-3 p q v | f | f = {!!}
 
-{-
+ex1-3 : ∀ p q → ((p ∧ (p ⊃ q)) ⊃ q ) は トートロジー である
 ex1-3 p q with p の付値 | q の付値 -- withで場合分け
-ex1-3 p q | t | t = refl
-ex1-3 p q | t | f = refl
-ex1-3 p q | f | t = refl
-ex1-3 p q | f | f = refl
+ex1-3 p q | t | t = {!!}
+ex1-3 p q | t | f = {!!}
+ex1-3 p q | f | t = {!!}
+ex1-3 p q | f | f = {!!}
 -- めんどくさいが、論理式の形とその評価した値とを厳密に区別することはだいじ。
 -- refl ではなくeqreasoningをつかってみるのもいいかもしれない。
 
 
-
+{-
 open import Data.Product
 open import Data.List
 命題変数一覧 : 論理式 → List 命題変数
@@ -135,3 +108,4 @@ hoge (x ∷ l) = 命題変数の付値 x ∷ hoge l
 問1-2 : ∀ p q r → (((p ∨ q) ⊃ r) ∨ (p ∧ q)) は 充足可能 である
 問1-2 p q r = {!!}
 -}
+
