@@ -58,8 +58,12 @@ open import Relation.Binary.Core renaming (_≡_ to _≈_)
 -- ≡はあとで定義したいのでrenameする。
 
 
-トートロジー : {v : 付値} → 論理式 → Set
-トートロジー {v} A = 論理式付値 {v} A ≈ t
+トートロジー : 論理式 → Set
+トートロジー A = ∀ v → 論理式付値 {v} A ≈ t
+
+open import Data.Product
+充足可能 : 付値 → 論理式 → Set
+充足可能 v A = {!!} --∃ (λ x → 論理式付値 {v} x ≈ t)
 
 _は_である : 論理式 → (論理式 → Set) → Set
 a は P である = P a
@@ -73,22 +77,23 @@ thm1-1 : {A : 論理式} → Decidable (A は トートロジー である)
 thm1-1 = {!!}
 -}
 
-_の付値 : {v : 付値} → 論理式 → Bool
-_の付値 {v} A = 論理式付値 {v} A
+--_の付値 : 論理式 → Bool
+--_の付値 A = 論理式付値 {_} A
 -- 例1.3
 
 ex1-3 : ∀ p q → ((p ∧ (p ⊃ q)) ⊃ q ) は トートロジー である
-ex1-3 p q with p の付値 | q の付値 -- withで場合分け
-ex1-3 p q | t | t = {!!}
-ex1-3 p q | t | f = {!!}
-ex1-3 p q | f | t = {!!}
-ex1-3 p q | f | f = {!!}
+ex1-3 p q v with 論理式付値 {v} p | 論理式付値 {v} q 
+ex1-3 p q v | t | t = refl
+ex1-3 p q v | t | f = refl
+ex1-3 p q v | f | t = refl
+ex1-3 p q v | f | f = refl
+
 -- めんどくさいが、論理式の形とその評価した値とを厳密に区別することはだいじ。
 -- refl ではなくeqreasoningをつかってみるのもいいかもしれない。
 
 
 {-
-open import Data.Product
+
 open import Data.List
 命題変数一覧 : 論理式 → List 命題変数
 命題変数一覧 < x > = [ x ]
