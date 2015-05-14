@@ -5,8 +5,8 @@ module Logic-in-IS where
 
 -- とりあえずＬＫのところまでかいてみる。
 
-postulate
-  命題変数 : Set 
+data 命題変数 : Set where
+  p q r : 命題変数
 
 -- 定義1.1
 
@@ -20,8 +20,8 @@ data 論理式 : Set where
 infix 100 ¬_
 
 -- 例1.1
-sample1 : (p q r : 命題変数) → 論理式
-sample1 p q r = < p > ⊃ ( < q > ∨ ¬ < r >)
+sample1 : 論理式
+sample1 = < p > ⊃ ( < q > ∨ ¬ < r >)
 
 open import Data.Bool 
   renaming (true to t; false to f;_∧_ to _and_;_∨_ to _or_)
@@ -62,8 +62,8 @@ open import Relation.Binary.Core renaming (_≡_ to _≈_)
 トートロジー A = ∀ v → 論理式付値 {v} A ≈ t
 
 open import Data.Product
-充足可能 : 付値 → 論理式 → Set
-充足可能 v A = {!!} --∃ (λ x → 論理式付値 {v} x ≈ t)
+充足可能 : 論理式 → Set
+充足可能 A = Σ 付値 (λ v → 論理式付値 {v} A ≈ t)
 
 _は_である : 論理式 → (論理式 → Set) → Set
 a は P である = P a
@@ -81,36 +81,22 @@ thm1-1 = {!!}
 --_の付値 A = 論理式付値 {_} A
 -- 例1.3
 
-ex1-3 : ∀ p q → ((p ∧ (p ⊃ q)) ⊃ q ) は トートロジー である
-ex1-3 p q v with 論理式付値 {v} p | 論理式付値 {v} q 
-ex1-3 p q v | t | t = refl
-ex1-3 p q v | t | f = refl
-ex1-3 p q v | f | t = refl
-ex1-3 p q v | f | f = refl
+ex1-3 : ((< p > ∧ (< p > ⊃ < q >)) ⊃ < q > ) は トートロジー である
+ex1-3 v with v p | v q 
+ex1-3 v | t | t = refl
+ex1-3 v | t | f = refl
+ex1-3 v | f | t = refl
+ex1-3 v | f | f = refl
 
 -- めんどくさいが、論理式の形とその評価した値とを厳密に区別することはだいじ。
 -- refl ではなくeqreasoningをつかってみるのもいいかもしれない。
 
+問1-2 : (((< p > ∨ < q >) ⊃ < r >) ∨ (< p > ∧ < q >)) は 充足可能 である
+問1-2 = v , refl
+  where
+   v : 付値
+   v p = f
+   v q = f
+   v r = t
 
-{-
-
-open import Data.List
-命題変数一覧 : 論理式 → List 命題変数
-命題変数一覧 < x > = [ x ]
-命題変数一覧 (A ∧ B) = 命題変数一覧 A ++ 命題変数一覧 B
-命題変数一覧 (A ∨ B) = 命題変数一覧 A ++ 命題変数一覧 B
-命題変数一覧 (A ⊃ B) = 命題変数一覧 A ++ 命題変数一覧 B
-命題変数一覧 (¬ A) = 命題変数一覧 A
-
-hoge : List 命題変数 → List Bool
-hoge [] = []
-hoge (x ∷ l) = 命題変数の付値 x ∷ hoge l
-
-
-充足可能 : (A : 論理式) → Set
-充足可能 A = {!(xs : 命題変数一覧 A) → ?!}
-
-問1-2 : ∀ p q r → (((p ∨ q) ⊃ r) ∨ (p ∧ q)) は 充足可能 である
-問1-2 p q r = {!!}
--}
 
