@@ -9,7 +9,6 @@ data 命題変数 : Set where
   p q r : 命題変数
 
 -- 定義1.1
-
 data 論理式 : Set where
   <_> : 命題変数 → 論理式
   _∧_ : 論理式 → 論理式 → 論理式
@@ -20,8 +19,8 @@ data 論理式 : Set where
 infix 100 ¬_
 
 -- 例1.1
-sample1 : 論理式
-sample1 = < p > ⊃ ( < q > ∨ ¬ < r >)
+例1-1 : 論理式
+例1-1 = < p > ⊃ ( < q > ∨ ¬ < r >)
 
 open import Data.Bool 
   renaming (true to t; false to f;_∧_ to _and_;_∨_ to _or_)
@@ -81,12 +80,12 @@ thm1-1 = {!!}
 --_の付値 A = 論理式付値 {_} A
 -- 例1.3
 
-ex1-3 : ((< p > ∧ (< p > ⊃ < q >)) ⊃ < q > ) は トートロジー である
-ex1-3 v with v p | v q 
-ex1-3 v | t | t = refl
-ex1-3 v | t | f = refl
-ex1-3 v | f | t = refl
-ex1-3 v | f | f = refl
+例1-3 : ((< p > ∧ (< p > ⊃ < q >)) ⊃ < q > ) は トートロジー である
+例1-3 v with v p | v q 
+例1-3 v | t | t = refl
+例1-3 v | t | f = refl
+例1-3 v | f | t = refl
+例1-3 v | f | f = refl
 
 -- めんどくさいが、論理式の形とその評価した値とを厳密に区別することはだいじ。
 -- refl ではなくeqreasoningをつかってみるのもいいかもしれない。
@@ -99,4 +98,22 @@ ex1-3 v | f | f = refl
    v q = f
    v r = t
 
+-- equivalent
+_≡_ : 論理式 → 論理式 → 論理式
+A ≡ B = (A ⊃ B) ∧ (B ⊃ A)
 
+infix 1 _≡_
+
+-- 必要十分条件
+_⇔_ : Set → Set → Set
+A ⇔ B = (A → B) × (B → A)
+
+infix 0 _⇔_
+
+問1-4 : {A B : 論理式} → (v : 論理式 → Bool)  → v(A ≡ B) ≈ t ⇔ v(A) ≈ v(B)
+問1-4 = {!!}
+
+sample : ∀ A → (A ≡ A ∧ A) は トートロジー である
+sample A v with 論理式付値 {v} A
+sample A v | t = refl
+sample A v | f = refl
