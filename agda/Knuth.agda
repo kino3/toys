@@ -15,7 +15,7 @@ b ^ suc n = b ^ n * b
 
 theorem1 : (b x y : ℕ) → b ^ (x + y) ≡ (b ^ x) * (b ^ y)
 theorem1 b zero zero = refl
-theorem1 b zero (suc n) = ? 
+theorem1 b zero (suc n) = {!!} 
 {-  begin
     b ^ (zero + suc n)
   ≈⟨ ? ⟩
@@ -41,3 +41,12 @@ n*0≡0 (suc n) =
     0
   ∎
 -}
+
+open import Data.Rational
+open import Data.Vec
+q : (k : ℕ) → Vec ℕ k → Vec ℚ k
+q zero [] = []
+q (suc x) (n ∷ ns) = record { numerator = {!!} ; denominator-1 = {!!} ; isCoprime = {!!} } ∷ {!!}
+
+hoge : Vec ℕ 3
+hoge = 2 ∷ 1 ∷ 4 ∷ []

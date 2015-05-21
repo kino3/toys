@@ -109,10 +109,20 @@ _⇔_ : Set → Set → Set
 A ⇔ B = (A → B) × (B → A)
 
 infix 0 _⇔_
-
-問1-4 : {A B : 論理式} → (v : 論理式 → Bool)  → v(A ≡ B) ≈ t ⇔ v(A) ≈ v(B)
-問1-4 = {!!}
-
+open import Data.Empty
+問1-4 : {v : 付値} {A B : 論理式} → 論理式付値 {v} (A ≡ B) ≈ t ⇔ 論理式付値 {v} A ≈ 論理式付値 {v} B
+問1-4 {v} {A} {B} with 論理式付値 {v} A | 論理式付値 {v} B
+問1-4 | t | t = (λ x → refl) , (λ x → refl)
+問1-4 | t | f = (λ ()) , (λ ())
+問1-4 | f | t = (λ ()) , (λ ())
+問1-4 | f | f = (λ x → refl) , (λ x → refl)
+{-
+問1-4 {x} {A} {B} v with v(A) | v(B)
+問1-4 v | t | t = (λ left-t → refl) , (λ right-t → {!!})
+問1-4 v | t | f = {!!} --(λ ()) , (λ ())
+問1-4 v | f | t = {!!} --(λ ()) , (λ ())
+問1-4 v | f | f = {!!} , {!!}
+-}
 sample : ∀ A → (A ≡ A ∧ A) は トートロジー である
 sample A v with 論理式付値 {v} A
 sample A v | t = refl
