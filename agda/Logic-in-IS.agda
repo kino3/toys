@@ -53,6 +53,9 @@ open import Data.Bool
 ... | t = f
 ... | f = t
 
+ν : 論理式 → Bool
+ν A = 論理式付値 {λ x → {!!}} A
+
 open import Relation.Binary.Core renaming (_≡_ to _≈_)
 -- ≡はあとで定義したいのでrenameする。
 
@@ -91,12 +94,17 @@ thm1-1 = {!!}
 -- refl ではなくeqreasoningをつかってみるのもいいかもしれない。
 
 問1-2 : (((< p > ∨ < q >) ⊃ < r >) ∨ (< p > ∧ < q >)) は 充足可能 である
-問1-2 = v , refl
+問1-2 = v , refl --refl
   where
    v : 付値
    v p = f
+   v q = t
+   v r = t
+   {-
+   v p = f
    v q = f
    v r = t
+   -}
 
 -- equivalent
 _≡_ : 論理式 → 論理式 → 論理式

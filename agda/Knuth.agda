@@ -42,6 +42,7 @@ n*0≡0 (suc n) =
   ∎
 -}
 
+{-
 open import Data.Rational
 open import Data.Vec
 q : (k : ℕ) → Vec ℕ k → Vec ℚ k
@@ -50,3 +51,36 @@ q (suc x) (n ∷ ns) = record { numerator = {!!} ; denominator-1 = {!!} ; isCopr
 
 hoge : Vec ℕ 3
 hoge = 2 ∷ 1 ∷ 4 ∷ []
+-}
+{-
+q : (k : ℕ) → Vec ℕ k → Vec ℚ k
+        /|\
+         |
+下記のコードのこの ℕ に関してエラーが出ます．
+
+====================================
+
+module sigma where
+-}
+open import Data.Nat
+open import Data.Vec
+open import Data.Rational
+
+q : (k : ℕ) → Vec ℕ k → Vec ℚ k
+q = {!!}
+{-
+====================================
+
+
+また，僕が昨日まで質問していた sigma の定義では，
+ベクタのどの要素から足し始めるかの i を与えること
+については考えていなかったことに気づきました．
+
+よって，Σ の型は下記のようになると考えます．おかし
+いところがあったら教えて下さい．
+-}
+Σ : (k : ℕ) -> (i : ℕ) -> Vec ℚ k -> ℚ
+Σ k i = {!!}
+
+Σ2 : ∀ k i -> Vec ℕ (k ∸ i + 1) -> Vec ℕ (k ∸ i + 1)
+Σ2 = {!!}
