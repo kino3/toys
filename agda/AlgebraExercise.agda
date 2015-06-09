@@ -37,7 +37,7 @@ x = record { Carrier = ℕ ; _≈_ = _≡_ ; _∙_ = _+_ ; ε = zero ;
            begin suc a + zero + zero 
                ≡⟨ refl ⟩ suc (a + zero) + zero 
                ≡⟨ lemma (suc (a + zero)) ⟩ suc a + zero 
-               ≡⟨ {!!} ⟩ {!!}
+               ≡⟨ refl ⟩ suc a + (zero + zero)
            ∎
     N-assoc (suc a) zero    (suc c) = {!!}
     N-assoc (suc a) (suc b) zero    = {!!}
