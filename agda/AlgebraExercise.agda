@@ -29,6 +29,11 @@ x = record { Carrier = ℕ ; _≈_ = _≡_ ; _∙_ = _+_ ; ε = zero ;
 
     open PropEq.≡-Reasoning
     N-assoc : Associative _≡_ _+_
+    N-assoc zero    b c = refl
+    --N-assoc (suc a) b c rewrite N-assoc a b c = refl
+    N-assoc (suc a) b c with a + b + c | N-assoc a b c
+    ... | ._ | refl = refl
+    {-
     N-assoc zero    zero    zero    = refl
     N-assoc zero    zero    (suc c) = refl
     N-assoc zero    (suc b) zero    = refl
@@ -42,5 +47,5 @@ x = record { Carrier = ℕ ; _≈_ = _≡_ ; _∙_ = _+_ ; ε = zero ;
     N-assoc (suc a) zero    (suc c) = {!!}
     N-assoc (suc a) (suc b) zero    = {!!}
     N-assoc (suc a) (suc b) (suc c) = {!!}
-
+    -}
 
