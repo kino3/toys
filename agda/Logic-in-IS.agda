@@ -4,6 +4,7 @@ module Logic-in-IS where
 -- http://www.nippyo.co.jp/book/1292.html
 
 -- とりあえずＬＫのところまでかいてみる。
+module Semantics where
 
 data 命題変数 : Set where
   p q r : 命題変数
@@ -75,8 +76,14 @@ a は P である = P a
 -- 定理1.1
 -- 与えられた論理式がトートロジーか否かは決定可能である。
 {-
-thm1-1 : {A : 論理式} → Decidable (A は トートロジー である)
-thm1-1 = {!!}
+open import Relation.Nullary.Core using (Dec)
+open import Data.Sum using (_⊎_)
+thm1-1 : (A : 論理式) → Dec ((A は トートロジー である) ⊎ ¬ A は トートロジー である)
+thm1-1 < x > = {!!}
+thm1-1 (A ∧ A₁) = {!!}
+thm1-1 (A ∨ A₁) = {!!}
+thm1-1 (A ⊃ A₁) = {!!}
+thm1-1 (論理式.¬ A) = {!!}
 -}
 
 --_の付値 : 論理式 → Bool
@@ -135,3 +142,25 @@ sample : ∀ A → (A ≡ A ∧ A) は トートロジー である
 sample A v with 論理式付値 {v} A
 sample A v | t = refl
 sample A v | f = refl
+
+module LK where
+-- P.23
+
+open Semantics
+open import Data.List renaming (_∷_ to _,_)
+
+-- 式
+infix 1 _⟶_ -- unicode 27F6 
+data _⟶_ : List 論理式 → List 論理式 → Set where
+  始式 : ∀ {A} → A ⟶ A
+  weakening左 : ∀ {Γ Δ A} → Γ ⟶ Δ → A , Γ ⟶ Δ
+  weakening右 : ∀ {Γ Δ A} → Γ ⟶ Δ → Γ ⟶ A , Δ -- TODO: 本はA , Δが逆。
+
+{-
+example1 : 式
+example1 = ((< p > ∧ < q >) ∷ []) ⇉ []
+-}
+-- 始式
+
+--data kouzou-kisoku : Set where
+
