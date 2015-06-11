@@ -54,9 +54,6 @@ open import Data.Bool
 ... | t = f
 ... | f = t
 
-ν : 論理式 → Bool
-ν A = 論理式付値 {λ x → {!!}} A
-
 open import Relation.Binary.Core renaming (_≡_ to _≈_)
 -- ≡はあとで定義したいのでrenameする。
 
@@ -152,8 +149,17 @@ open import Data.List renaming (_++_ to _,_)
 -- 式
 infix 1 _⟶_ -- U+27F6 
 data _⟶_ : List 論理式 → List 論理式 → Set where
-  始式 : ∀ {A} → [ A ] ⟶ [ A ]
-  weakening左 : ∀ {Γ Δ A} → Γ ⟶ Δ → A , Γ ⟶ Δ
-  weakening右 : ∀ {Γ Δ A} → Γ ⟶ Δ → Γ ⟶ Δ , A -- TODO: 本はA , Δが逆。
-  
-
+  始式 : {A : 論理式} → [ A ] ⟶ [ A ]
+  -- 構造に関する推論規則 P.24
+  weakening左 : ∀ {Γ Δ A} → (Γ ⟶ Δ) → ([ A ] , Γ ⟶ Δ)
+  weakening右 : ∀ {Γ Δ A} → (Γ ⟶ Δ) → (Γ ⟶ Δ , [ A ])
+  contraction左 : ∀ {Γ Δ A} → ([ A ] , [ A ] , Γ ⟶ Δ) → ([ A ] , Γ ⟶ Δ) 
+  contraction右 : ∀ {Γ Δ A} → (Γ ⟶ Δ , [ A ] , [ A ]) → (Γ ⟶ Δ , [ A ]) 
+  exchange左 : ∀ {Γ Δ A B Π} → (Γ , [ A ] , [ B ] , Π ⟶ Δ) → (Γ , [ B ] , [ A ] , Π ⟶ Δ) 
+  exchange右 : ∀ {Γ Δ A B Σ} → (Γ ⟶ Δ , [ A ] , [ B ] , Σ) → (Γ ⟶ Δ , [ B ] , [ A ] , Σ) 
+  cut : ∀ {Γ Δ A Π Σ} → (Π ⟶ Δ , [ A ]) → ([ A ] , Π ⟶ Σ) → (Γ , Π ⟶ Δ , Σ) 
+  -- 論理結合子に関する推論規則 P.26
+  ∧左1 : ∀ {Γ Δ A B} → ([ A ] , Γ ⟶ Δ) → ([ A ∧ B ] , Γ ⟶ Δ) 
+  ∧左2 : ∀ {Γ Δ A B} → ([ B ] , Γ ⟶ Δ) → ([ A ∧ B ] , Γ ⟶ Δ) 
+  ∧右 : ∀ {Γ Δ A B} → (Γ ⟶ Δ , [ A ]) → (Γ ⟶ Δ , [ B ]) → (Γ ⟶ Δ , [ A ∧ B ])
+  ∨左 : ∀ {Γ Δ A B} → ([ A ] , Γ ⟶ Δ) → ([ B ] , Γ ⟶ Δ) → ([ A ∨ B ] , Γ ⟶ Δ)
