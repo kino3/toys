@@ -64,7 +64,7 @@ open import Relation.Binary.Core renaming (_≡_ to _≈_)
 トートロジー : 論理式 → Set
 トートロジー A = ∀ v → 論理式付値 {v} A ≈ t
 
-open import Data.Product
+open import Data.Product using (Σ;_×_) renaming (_,_ to _&_)
 充足可能 : 論理式 → Set
 充足可能 A = Σ 付値 (λ v → 論理式付値 {v} A ≈ t)
 
@@ -101,7 +101,7 @@ thm1-1 (論理式.¬ A) = {!!}
 -- refl ではなくeqreasoningをつかってみるのもいいかもしれない。
 
 問1-2 : (((< p > ∨ < q >) ⊃ < r >) ∨ (< p > ∧ < q >)) は 充足可能 である
-問1-2 = v , refl --refl
+問1-2 = v & refl --refl
   where
    v : 付値
    v p = f
@@ -127,10 +127,10 @@ infix 0 _⇔_
 open import Data.Empty
 問1-4 : {v : 付値} {A B : 論理式} → 論理式付値 {v} (A ≡ B) ≈ t ⇔ 論理式付値 {v} A ≈ 論理式付値 {v} B
 問1-4 {v} {A} {B} with 論理式付値 {v} A | 論理式付値 {v} B
-問1-4 | t | t = (λ x → refl) , (λ x → refl)
-問1-4 | t | f = (λ ()) , (λ ())
-問1-4 | f | t = (λ ()) , (λ ())
-問1-4 | f | f = (λ x → refl) , (λ x → refl)
+問1-4 | t | t = (λ x → refl) & (λ x → refl)
+問1-4 | t | f = (λ ()) & (λ ())
+問1-4 | f | t = (λ ()) & (λ ())
+問1-4 | f | f = (λ x → refl) & (λ x → refl)
 {-
 問1-4 {x} {A} {B} v with v(A) | v(B)
 問1-4 v | t | t = (λ left-t → refl) , (λ right-t → {!!})
@@ -147,20 +147,13 @@ module LK where
 -- P.23
 
 open Semantics
-open import Data.List renaming (_∷_ to _,_)
+open import Data.List renaming (_++_ to _,_)
 
 -- 式
-infix 1 _⟶_ -- unicode 27F6 
+infix 1 _⟶_ -- U+27F6 
 data _⟶_ : List 論理式 → List 論理式 → Set where
-  始式 : ∀ {A} → A ⟶ A
+  始式 : ∀ {A} → [ A ] ⟶ [ A ]
   weakening左 : ∀ {Γ Δ A} → Γ ⟶ Δ → A , Γ ⟶ Δ
-  weakening右 : ∀ {Γ Δ A} → Γ ⟶ Δ → Γ ⟶ A , Δ -- TODO: 本はA , Δが逆。
-
-{-
-example1 : 式
-example1 = ((< p > ∧ < q >) ∷ []) ⇉ []
--}
--- 始式
-
---data kouzou-kisoku : Set where
+  weakening右 : ∀ {Γ Δ A} → Γ ⟶ Δ → Γ ⟶ Δ , A -- TODO: 本はA , Δが逆。
+  
 
