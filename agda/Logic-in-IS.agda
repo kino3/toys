@@ -9,9 +9,13 @@ module Semantics where
 data 命題変数 : Set where
   p q r : 命題変数
 
+data 命題定数 : Set where
+  ⊤ ⊥ : 命題定数
+
 -- 定義1.1
 data 論理式 : Set where
   <_> : 命題変数 → 論理式
+  /_/ : 命題定数 → 論理式
   _∧_ : 論理式 → 論理式 → 論理式
   _∨_ : 論理式 → 論理式 → 論理式
   _⊃_ : 論理式 → 論理式 → 論理式
@@ -53,6 +57,8 @@ open import Data.Bool
 論理式付値 {v} (¬ A) with 論理式付値 {v} A
 ... | t = f
 ... | f = t
+論理式付値 / ⊤ / = t
+論理式付値 / ⊥ / = f
 
 open import Relation.Binary.Core renaming (_≡_ to _≈_)
 -- ≡はあとで定義したいのでrenameする。
@@ -128,17 +134,18 @@ open import Data.Empty
 問1-4 | t | f = (λ ()) & (λ ())
 問1-4 | f | t = (λ ()) & (λ ())
 問1-4 | f | f = (λ x → refl) & (λ x → refl)
-{-
-問1-4 {x} {A} {B} v with v(A) | v(B)
-問1-4 v | t | t = (λ left-t → refl) , (λ right-t → {!!})
-問1-4 v | t | f = {!!} --(λ ()) , (λ ())
-問1-4 v | f | t = {!!} --(λ ()) , (λ ())
-問1-4 v | f | f = {!!} , {!!}
--}
-sample : ∀ A → (A ≡ A ∧ A) は トートロジー である
-sample A v with 論理式付値 {v} A
-sample A v | t = refl
-sample A v | f = refl
+
+問1-5 : {A B : 論理式} (v : 論理式付値) → v (A ≡ B) ≈ v ((A ∧ B) ∨ (¬ A ∧ ¬ B))
+問1-5 {A} {B} v with 論理式付値 {v} A | 論理式付値 {v} B
+問1-5 v | t | t = refl
+問1-5 v | t | f = refl
+問1-5 v | f | t = refl
+問1-5 v | f | f = refl
+
+定理1-3-1a : ∀ A → (A ∧ A ≡ A) は トートロジー である
+定理1-3-1a A v with 論理式付値 {v} A
+定理1-3-1a A v | t = refl
+定理1-3-1a A v | f = refl
 
 module LK where
 -- P.23
