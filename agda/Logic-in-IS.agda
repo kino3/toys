@@ -9,13 +9,10 @@ module Semantics where
 data 命題変数 : Set where
   p q r : 命題変数
 
-data 命題定数 : Set where
-  ⊤ ⊥ : 命題定数
-
 -- 定義1.1
 data 論理式 : Set where
   <_> : 命題変数 → 論理式
-  /_/ : 命題定数 → 論理式
+  ⊤ ⊥ : 論理式
   _∧_ : 論理式 → 論理式 → 論理式
   _∨_ : 論理式 → 論理式 → 論理式
   _⊃_ : 論理式 → 論理式 → 論理式
@@ -29,15 +26,15 @@ infix 100 ¬_
 
 open import Data.Bool 
   renaming (true to t; false to f;_∧_ to _and_;_∨_ to _or_)
---data Bool : Set where
---  t f : Bool
 
-付値 : Set
-付値 = 命題変数 → Bool
+-- P.9
+付値' = 命題変数 → Bool
 
 -- 論理式の付値をさだめるときは、暗黙的に命題変数の付値がなにかしら決まっている世界を考えている。
 -- そのため、{v : 付値} がある。これがないと< x >のときを定義できない。
-論理式付値 : {v : 付値} → 論理式 → Bool
+--拡張
+
+論理式付値 : {v : 付値'} → 論理式 → Bool
 論理式付値 {v} < x > = v x
 論理式付値 {v} (A ∧ B) with 論理式付値 {v} A | 論理式付値 {v} B
 ... | t | t = t
@@ -57,49 +54,46 @@ open import Data.Bool
 論理式付値 {v} (¬ A) with 論理式付値 {v} A
 ... | t = f
 ... | f = t
-論理式付値 / ⊤ / = t
-論理式付値 / ⊥ / = f
+論理式付値 ⊤ = t
+論理式付値 ⊥ = f
 
 open import Relation.Binary.Core renaming (_≡_ to _≈_)
 -- ≡はあとで定義したいのでrenameする。
 
+open import Data.Product using (Σ;_×_) renaming (_,_ to _&_)
+-- 必要十分条件
+_⇔_ : Set → Set → Set
+A ⇔ B = (A → B) × (B → A)
+
+付値 = 論理式 → Bool
 
 トートロジー : 論理式 → Set
-トートロジー A = ∀ v → 論理式付値 {v} A ≈ t
+トートロジー A = (v : 付値) → v(A) ≈ t
 
-open import Data.Product using (Σ;_×_) renaming (_,_ to _&_)
 充足可能 : 論理式 → Set
-充足可能 A = Σ 付値 (λ v → 論理式付値 {v} A ≈ t)
+充足可能 A = Σ 付値 (λ v → v(A) ≈ t)
 
-_は_である : 論理式 → (論理式 → Set) → Set
-a は P である = P a
+論理式_が_である : 論理式 → (論理式 → Set) → Set
+論理式 a が P である = P a
 
 恒真 = トートロジー
 
+{-
 -- 定理1.1
 -- 与えられた論理式がトートロジーか否かは決定可能である。
-{-
-open import Relation.Nullary.Core using (Dec)
-open import Data.Sum using (_⊎_)
-thm1-1 : (A : 論理式) → Dec ((A は トートロジー である) ⊎ ¬ A は トートロジー である)
-thm1-1 < x > = {!!}
-thm1-1 (A ∧ A₁) = {!!}
-thm1-1 (A ∨ A₁) = {!!}
-thm1-1 (A ⊃ A₁) = {!!}
-thm1-1 (論理式.¬ A) = {!!}
 -}
 
---_の付値 : 論理式 → Bool
---_の付値 A = 論理式付値 {_} A
--- 例1.3
 
-例1-3 : ((< p > ∧ (< p > ⊃ < q >)) ⊃ < q > ) は トートロジー である
+例1-3 : 論理式 ((< p > ∧ (< p > ⊃ < q >)) ⊃ < q > ) が トートロジー である
+例1-3 v = {!!}
+{-
 例1-3 v with v p | v q 
 例1-3 v | t | t = refl
 例1-3 v | t | f = refl
 例1-3 v | f | t = refl
 例1-3 v | f | f = refl
-
+-}
+{-
 -- めんどくさいが、論理式の形とその評価した値とを厳密に区別することはだいじ。
 -- refl ではなくeqreasoningをつかってみるのもいいかもしれない。
 
@@ -122,9 +116,6 @@ A ≡ B = (A ⊃ B) ∧ (B ⊃ A)
 
 infix 1 _≡_
 
--- 必要十分条件
-_⇔_ : Set → Set → Set
-A ⇔ B = (A → B) × (B → A)
 
 infix 0 _⇔_
 open import Data.Empty
@@ -153,6 +144,7 @@ toi1-1 : ∀ A B → (A ⊃ B) は 充足可能 である
                → A は 充足可能 である 
                → B は 充足可能 である
 toi1-1 A B (v & eq) (w & eq2) = {!!} & {!!}
+-}
 
 module LK where
 -- P.23
