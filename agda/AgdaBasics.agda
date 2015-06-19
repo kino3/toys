@@ -79,6 +79,7 @@ data _⋆ (α : Set) : Set where
   _◅_ : α -> α ⋆ -> α ⋆
 
 -- 2015.05.27 by 高植 but absent...
+-- 2015.06.17 by 高植 
 
 -- 2.2 Dependent functions
 
@@ -94,7 +95,6 @@ apply A B f a = f a
 apply2 :          (B : Bool → Set) → ((x : Bool) → B x) → (a : Bool) → B a
 apply2 B f true = f true
 apply2 B f false = f false
-
 
 identity2 : (A : Set) → A → A
 identity2 = λ(A : Set) x → x
@@ -264,4 +264,32 @@ equal? (suc n) (suc m)  | neq p   = neq (s≠s p)
 
 hoge3 : Equal? 3 4
 hoge3 = equal? 3 4
+
+infix 20 _⊆_
+data _⊆_ {A : Set} : List A → List A → Set where
+  stop : [] ⊆ []
+  drop : ∀ {xs y ys} → xs ⊆ ys →      xs ⊆ y :: ys
+  keep : ∀ {x xs ys} → xs ⊆ ys → x :: xs ⊆ x :: ys
+
+lem-filter : {A : Set}(p : A → Bool)(xs : List A) → filter p xs ⊆ xs
+lem-filter p []        = stop
+lem-filter p (x :: xs) with p x
+lem-filter p (x :: xs) | true  = keep (lem-filter p xs)
+lem-filter p (x :: xs) | false = drop (lem-filter p xs)
+
+{-
+lem-plus-zero : (n : Nat) → n + zero == n
+lem-plus-zero zero    = refl
+lem-plus-zero (suc n) = {!!}
+  ?0 : (suc n) + zero == suc n
+-}
+-- suc n + zero = suc (n + zero) by Agda
+--              = suc m          by me
+
+lem-plus-zero : (n : Nat) → n + zero == n
+lem-plus-zero zero    = refl
+lem-plus-zero (suc n) with n + zero | lem-plus-zero n
+lem-plus-zero (suc n) | .n | refl = refl
+
+  -- ?0 : suc m == suc n
 

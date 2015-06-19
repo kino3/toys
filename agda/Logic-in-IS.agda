@@ -135,17 +135,24 @@ open import Data.Empty
 問1-4 | f | t = (λ ()) & (λ ())
 問1-4 | f | f = (λ x → refl) & (λ x → refl)
 
-問1-5 : {A B : 論理式} (v : 論理式付値) → v (A ≡ B) ≈ v ((A ∧ B) ∨ (¬ A ∧ ¬ B))
-問1-5 {A} {B} v with 論理式付値 {v} A | 論理式付値 {v} B
+{-
+問1-5 : {A B : 論理式} (v : 論理式 → Bool) → v (A ≡ B) ≈ v ((A ∧ B) ∨ (¬ A ∧ ¬ B))
+問1-5 {A} {B} v with v A | v B
 問1-5 v | t | t = refl
 問1-5 v | t | f = refl
 問1-5 v | f | t = refl
 問1-5 v | f | f = refl
+-}
 
 定理1-3-1a : ∀ A → (A ∧ A ≡ A) は トートロジー である
 定理1-3-1a A v with 論理式付値 {v} A
 定理1-3-1a A v | t = refl
 定理1-3-1a A v | f = refl
+
+toi1-1 : ∀ A B → (A ⊃ B) は 充足可能 である 
+               → A は 充足可能 である 
+               → B は 充足可能 である
+toi1-1 A B (v & eq) (w & eq2) = {!!} & {!!}
 
 module LK where
 -- P.23
