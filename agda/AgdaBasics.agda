@@ -293,3 +293,56 @@ lem-plus-zero (suc n) | .n | refl = refl
 
   -- ?0 : suc m == suc n
 
+-- 2.7 Modules
+
+module M where
+  data Maybe (A : Set) : Set where
+    nothing : Maybe A
+    just    : A → Maybe A
+
+  maybe : {A B : Set} → B → (A → B) → Maybe A → B
+  maybe b f nothing  = b
+  maybe b f (just x) = f x
+
+module A where
+  private
+   internal : Nat
+   internal = zero
+
+  exported : Nat → Nat
+  exported n = n + internal
+
+mapMaybe₁ : {A B : Set} → (A → B) → M.Maybe A → M.Maybe B
+mapMaybe₁ f M.nothing  = M.nothing
+mapMaybe₁ f (M.just x) = M.just (f x)
+
+
+-- 2.9 Exercises
+
+-- Exercise 2.1. Matrix transposition
+
+Matrix : Set → Nat → Nat → Set
+Matrix A n m = Vec (Vec A n) m
+
+vec : {n : Nat}{A : Set} → A → Vec A n
+vec {zero}  x = []
+vec {suc n} x = x :: vec x
+
+infixl 90 _$_
+_$_ : {n : Nat}{A B : Set} → Vec (A → B) n → Vec A n → Vec B n
+[] $ [] = []
+(f :: fs) $ (x :: xs) = f x :: fs $ xs
+
+transpose : forall {A n m} → Matrix A n m → Matrix A m n
+--transpose {A} {n} {m} xss = {!!} $ {!!} $ vec {{!!}} {A} {!!}
+transpose {n =  zero} {m =  zero} [] = []
+transpose {n =  zero} {m = suc m} xss = []
+transpose {n = suc n} {m =  zero} xss = [] :: transpose []
+transpose {n = suc n} {m = suc x} (xs :: xss) = vec (vec (head xs))
+
+
+trans23 : Matrix Nat 3 2 → Matrix Nat 2 3
+trans23 ((x1 :: y1 :: z1 :: []) :: (x2 :: y2 :: z2 :: []) :: [])
+  = ((x1 :: x2 :: []) :: (y1 :: y2 :: []) :: (z1 :: z2 :: []) :: []) 
+m : Matrix Nat 3 0
+m = []
