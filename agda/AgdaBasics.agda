@@ -334,15 +334,18 @@ _$_ : {n : Nat}{A B : Set} → Vec (A → B) n → Vec A n → Vec B n
 (f :: fs) $ (x :: xs) = f x :: fs $ xs
 
 transpose : forall {A n m} → Matrix A n m → Matrix A m n
---transpose {A} {n} {m} xss = {!!} $ {!!} $ vec {{!!}} {A} {!!}
-transpose {n =  zero} {m =  zero} [] = []
-transpose {n =  zero} {m = suc m} xss = []
-transpose {n = suc n} {m =  zero} xss = [] :: transpose []
-transpose {n = suc n} {m = suc x} (xs :: xss) = vec (vec (head xs))
+transpose []        = vec []
+transpose (v :: vs) = ((vec _::_) $ v) $ transpose vs
 
+--      _::_     :      A → (Vec A m → Vec A (suc m))
+--  vec _::_     : Vec (A → (Vec A m → Vec A (suc m))) n
+--  v            : Vec  A                              n
+--  vec _::_ $ v : Vec (Vec A m → Vec A (suc m))) n
+--  
 
 trans23 : Matrix Nat 3 2 → Matrix Nat 2 3
 trans23 ((x1 :: y1 :: z1 :: []) :: (x2 :: y2 :: z2 :: []) :: [])
   = ((x1 :: x2 :: []) :: (y1 :: y2 :: []) :: (z1 :: z2 :: []) :: []) 
 m : Matrix Nat 3 0
 m = []
+
