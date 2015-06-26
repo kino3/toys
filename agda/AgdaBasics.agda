@@ -188,6 +188,16 @@ magic' : {A : Set} → Empty → A
 magic' (empty ())
 
 -- TODO _!_, tabulate
+_!_ : {n : Nat}{A : Set} → Vec A n → Fin n → A
+[] ! ()
+x :: xs ! fzero  = x
+x :: xs ! fsuc y = xs ! y
+
+tabulate : {n : Nat}{A : Set} → (Fin n → A) → Vec A n
+tabulate {zero}  f = []
+tabulate {suc n} f = f fzero :: tabulate (f ∘ fsuc)
+
+
 
 -- 2.5 Programs as proofs
 
@@ -316,6 +326,45 @@ mapMaybe₁ : {A B : Set} → (A → B) → M.Maybe A → M.Maybe B
 mapMaybe₁ f M.nothing  = M.nothing
 mapMaybe₁ f (M.just x) = M.just (f x)
 
+mapMaybe₂ : {A B : Set} → (A → B) → M.Maybe A → M.Maybe B
+mapMaybe₂ f m = let open M in maybe nothing (just ∘ f) m
+
+open M
+
+mapMaybe₃ : {A B : Set} → (A → B) → Maybe A → Maybe B
+mapMaybe₃ f m = maybe nothing (just ∘ f) m
+
+open M hiding (maybe)
+  renaming (Maybe to _option; nothing to none; just to some)
+
+mapOption : {A B : Set} → (A → B) → A option → B option
+mapOption f none     = none
+mapOption f (some x) = some (f x)
+
+mtrue : Maybe Bool
+mtrue = mapOption not (just false)
+
+-- Parameterised modules
+module Sort (A : Set)(_<_ : A → A → Bool) where
+  insert : A → List A → List A
+  insert y []        = y :: []
+  insert y (x :: xs) with x < y
+  insert y (x :: xs) | true  = x :: insert y xs
+  insert y (x :: xs) | false = y :: x :: xs
+
+  sort : List A → List A
+  sort []        = []
+  sort (x :: xs) = insert x (sort xs)
+
+sort₁ : (A : Set)(_<_ : A → A → Bool) → List A → List A
+sort₁ = Sort.sort
+
+module SortNat = Sort Nat _<_
+
+sort₂ : List Nat → List Nat
+sort₂ = SortNat.sort
+
+x = sort₂ (5 :: 3 :: 1 :: [])
 
 -- 2.9 Exercises
 
