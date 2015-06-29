@@ -187,7 +187,6 @@ data Empty : Set where
 magic' : {A : Set} → Empty → A
 magic' (empty ())
 
--- TODO _!_, tabulate
 _!_ : {n : Nat}{A : Set} → Vec A n → Fin n → A
 [] ! ()
 x :: xs ! fzero  = x
@@ -227,6 +226,8 @@ lookup (x :: xs) (suc n) p = lookup xs n p
 
 data _==_ {A : Set}(x : A) : A → Set where
   refl : x == x
+infix 0 _==_
+
 
 -- less than or equals (leq)
 data _≤_ : Nat → Nat → Set where
@@ -364,7 +365,16 @@ module SortNat = Sort Nat _<_
 sort₂ : List Nat → List Nat
 sort₂ = SortNat.sort
 
-x = sort₂ (5 :: 3 :: 1 :: [])
+ex = sort₂ (5 :: 3 :: 1 :: [])
+
+-- 2.8 Records
+
+record Point : Set where
+  field x : Nat
+        y : Nat
+
+mkPoint : Nat → Nat → Point
+mkPoint a b = record { x = a ; y = b }
 
 -- 2.9 Exercises
 
@@ -395,6 +405,25 @@ transpose (v :: vs) = ((vec _::_) $ v) $ transpose vs
 trans23 : Matrix Nat 3 2 → Matrix Nat 2 3
 trans23 ((x1 :: y1 :: z1 :: []) :: (x2 :: y2 :: z2 :: []) :: [])
   = ((x1 :: x2 :: []) :: (y1 :: y2 :: []) :: (z1 :: z2 :: []) :: []) 
-m : Matrix Nat 3 0
-m = []
+
+M32 : Matrix Nat 3 2
+M32 = (1 :: 3 :: 5 :: []) :: (2 :: 4 :: 6 :: []) :: []
+
+temp1 : Vec (Vec Nat 2 → Vec Nat (suc 2)) 3
+temp1 = vec _::_ $ (1 :: 3 :: 5 :: [])
+-- temp1 : (_::_ 1) :: (_::_ 3) :: (_::_ 5) :: []
+-- temp1 : (λ x → 1 :: x) :: (λ x → 3 :: x) :: (λ x → 5 :: x) :: []
+
+
+temp2 : Matrix Nat 1 3
+temp2 = transpose ((2 :: 4 :: 6 :: []) :: [])
+-- temp2 : (2 :: []) :: (4 :: []) :: (6 :: []) :: []
+
+-- Exercise 2.2
+
+lem-!-tab : forall {A n} (f : Fin n → A)(i : Fin n) → tabulate f ! i == f i
+lem-!-tab {n = zero} f ()
+lem-!-tab {n = suc a} f fzero    = refl
+lem-!-tab {n = suc a} f (fsuc i) = ?
+
 
