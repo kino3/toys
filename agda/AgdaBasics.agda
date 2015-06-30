@@ -439,5 +439,17 @@ lem-tab-! []        = refl
 lem-tab-! (x :: xs) with tabulate (_!_ xs) | lem-tab-! xs
 lem-tab-! (x :: xs) | .xs | refl = refl
 
+-- Exercise 2.3
 
+-- (a)
+⊆-refl : {A : Set} {xs : List A} → xs ⊆ xs
+⊆-refl {xs = []}      = stop
+⊆-refl {xs = x :: xs} = keep (⊆-refl {xs = xs})
 
+⊆-trans : {A : Set} {xs ys zs : List A} → 
+  xs ⊆ ys → ys ⊆ zs → xs ⊆ zs
+⊆-trans  stop    q        = q
+⊆-trans (drop p) (drop q) = drop (⊆-trans (drop p) q) 
+⊆-trans (drop p) (keep q) = ⊆-trans p (drop q)
+⊆-trans (keep p) (drop q) = drop (⊆-trans (keep p) q)
+⊆-trans (keep p) (keep q) = keep (⊆-trans p q)
