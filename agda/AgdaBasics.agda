@@ -422,8 +422,22 @@ temp2 = transpose ((2 :: 4 :: 6 :: []) :: [])
 -- Exercise 2.2
 
 lem-!-tab : forall {A n} (f : Fin n → A)(i : Fin n) → tabulate f ! i == f i
-lem-!-tab {n = zero} f ()
-lem-!-tab {n = suc a} f fzero    = refl
-lem-!-tab {n = suc a} f (fsuc i) = ?
+lem-!-tab f fzero    = refl
+lem-!-tab f (fsuc i) = lem-!-tab (f ∘ fsuc) i -- tabulate f ! fsuc i == f (fsuc i)
+
+{-
+f        : [Fin n] → A
+
+fsuc     : Fin n   → [Fin (suc n)] -- General
+fsuc     : Fin n-1 → [Fin n]       -- This case
+
+f ∘ fsuc : Fin n-1 → A 
+-}
+
+lem-tab-! : forall {A n} (xs : Vec A n) → tabulate (_!_ xs) == xs
+lem-tab-! []        = refl
+lem-tab-! (x :: xs) with tabulate (_!_ xs) | lem-tab-! xs
+lem-tab-! (x :: xs) | .xs | refl = refl
+
 
 
