@@ -448,8 +448,15 @@ lem-tab-! (x :: xs) | .xs | refl = refl
 
 ⊆-trans : {A : Set} {xs ys zs : List A} → 
   xs ⊆ ys → ys ⊆ zs → xs ⊆ zs
+⊆-trans stop     q = q
+⊆-trans (drop xs⊆ys) (drop y∷ys⊆zs) = drop (⊆-trans (drop xs⊆ys) y∷ys⊆zs) -- xs ⊆ z :: zs
+⊆-trans (drop xs⊆ys) (keep ys⊆zs)   = drop (⊆-trans       xs⊆ys    ys⊆zs) --⊆-trans xs⊆ys (drop ys⊆zs) -- xs ⊆ y :: zs
+⊆-trans (keep xs⊆ys) (drop x∷ys⊆zs) = drop (⊆-trans (keep xs⊆ys) x∷ys⊆zs) -- x :: xs ⊆ y :: zs
+⊆-trans (keep xs⊆ys) (keep ys⊆zs)   = keep (⊆-trans       xs⊆ys    ys⊆zs) -- x :: xs ⊆ x :: zs
+{-
 ⊆-trans  stop    q        = q
 ⊆-trans (drop p) (drop q) = drop (⊆-trans (drop p) q) 
 ⊆-trans (drop p) (keep q) = ⊆-trans p (drop q)
 ⊆-trans (keep p) (drop q) = drop (⊆-trans (keep p) q)
 ⊆-trans (keep p) (keep q) = keep (⊆-trans p q)
+-}
