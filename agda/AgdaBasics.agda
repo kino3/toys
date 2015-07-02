@@ -378,93 +378,132 @@ mkPoint a b = record { x = a ; y = b }
 
 -- 2.9 Exercises
 
-module Exercises where
-  -- Exercise 2.1. Matrix transposition
+-- Exercise 2.1. Matrix transposition
 
-  Matrix : Set → Nat → Nat → Set
-  Matrix A n m = Vec (Vec A n) m
+Matrix : Set → Nat → Nat → Set
+Matrix A n m = Vec (Vec A n) m
 
-  vec : {n : Nat}{A : Set} → A → Vec A n
-  vec {zero}  x = []
-  vec {suc n} x = x :: vec x
+vec : {n : Nat}{A : Set} → A → Vec A n
+vec {zero}  x = []
+vec {suc n} x = x :: vec x
 
-  infixl 90 _$_
-  _$_ : {n : Nat}{A B : Set} → Vec (A → B) n → Vec A n → Vec B n
-  [] $ [] = []
-  (f :: fs) $ (x :: xs) = f x :: fs $ xs
+infixl 90 _$_
+_$_ : {n : Nat}{A B : Set} → Vec (A → B) n → Vec A n → Vec B n
+[] $ [] = []
+(f :: fs) $ (x :: xs) = f x :: fs $ xs
 
-  transpose : forall {A n m} → Matrix A n m → Matrix A m n
-  transpose []        = vec []
-  transpose (v :: vs) = ((vec _::_) $ v) $ transpose vs
+transpose : forall {A n m} → Matrix A n m → Matrix A m n
+transpose []        = vec []
+transpose (v :: vs) = ((vec _::_) $ v) $ transpose vs
 
-  --      _::_     :      A → (Vec A m → Vec A (suc m))
-  --  vec _::_     : Vec (A → (Vec A m → Vec A (suc m))) n
-  --  v            : Vec  A                              n
-  --  vec _::_ $ v : Vec (Vec A m → Vec A (suc m))) n
-  --  
+--      _::_     :      A → (Vec A m → Vec A (suc m))
+--  vec _::_     : Vec (A → (Vec A m → Vec A (suc m))) n
+--  v            : Vec  A                              n
+--  vec _::_ $ v : Vec (Vec A m → Vec A (suc m))) n
+--  
 
-  trans23 : Matrix Nat 3 2 → Matrix Nat 2 3
-  trans23 ((x1 :: y1 :: z1 :: []) :: (x2 :: y2 :: z2 :: []) :: [])
-    = ((x1 :: x2 :: []) :: (y1 :: y2 :: []) :: (z1 :: z2 :: []) :: []) 
+trans23 : Matrix Nat 3 2 → Matrix Nat 2 3
+trans23 ((x1 :: y1 :: z1 :: []) :: (x2 :: y2 :: z2 :: []) :: [])
+  = ((x1 :: x2 :: []) :: (y1 :: y2 :: []) :: (z1 :: z2 :: []) :: []) 
 
-  M32 : Matrix Nat 3 2
-  M32 = (1 :: 3 :: 5 :: []) :: (2 :: 4 :: 6 :: []) :: []
+M32 : Matrix Nat 3 2
+M32 = (1 :: 3 :: 5 :: []) :: (2 :: 4 :: 6 :: []) :: []
 
-  temp1 : Vec (Vec Nat 2 → Vec Nat (suc 2)) 3
-  temp1 = vec _::_ $ (1 :: 3 :: 5 :: [])
-  -- temp1 : (_::_ 1) :: (_::_ 3) :: (_::_ 5) :: []
-  -- temp1 : (λ x → 1 :: x) :: (λ x → 3 :: x) :: (λ x → 5 :: x) :: []
+temp1 : Vec (Vec Nat 2 → Vec Nat (suc 2)) 3
+temp1 = vec _::_ $ (1 :: 3 :: 5 :: [])
+-- temp1 : (_::_ 1) :: (_::_ 3) :: (_::_ 5) :: []
+-- temp1 : (λ x → 1 :: x) :: (λ x → 3 :: x) :: (λ x → 5 :: x) :: []
 
 
-  temp2 : Matrix Nat 1 3
-  temp2 = transpose ((2 :: 4 :: 6 :: []) :: [])
-  -- temp2 : (2 :: []) :: (4 :: []) :: (6 :: []) :: []
+temp2 : Matrix Nat 1 3
+temp2 = transpose ((2 :: 4 :: 6 :: []) :: [])
+-- temp2 : (2 :: []) :: (4 :: []) :: (6 :: []) :: []
 
-  -- Exercise 2.2
+-- Exercise 2.2
 
-  lem-!-tab : forall {A n} (f : Fin n → A)(i : Fin n) → tabulate f ! i == f i
-  lem-!-tab f fzero    = refl
-  lem-!-tab f (fsuc i) = lem-!-tab (f ∘ fsuc) i -- tabulate f ! fsuc i == f (fsuc i)
+-- (a)
+lem-!-tab : forall {A n} (f : Fin n → A)(i : Fin n) → tabulate f ! i == f i
+lem-!-tab f fzero    = refl
+lem-!-tab f (fsuc i) = lem-!-tab (f ∘ fsuc) i 
 
-  {-
-  f        : [Fin n] → A
+{-
+f        : [Fin (suc n)] → A
 
-  fsuc     : Fin n   → [Fin (suc n)] -- General
-  fsuc     : Fin n-1 → [Fin n]       -- This case
+fsuc     : Fin n   → [Fin (suc n)] -- General
 
-  f ∘ fsuc : Fin n-1 → A 
-  -}
+f ∘ fsuc : Fin n → A 
+-}
 
-  lem-tab-! : forall {A n} (xs : Vec A n) → tabulate (_!_ xs) == xs
-  lem-tab-! []        = refl
-  lem-tab-! (x :: xs) with tabulate (_!_ xs) | lem-tab-! xs
-  lem-tab-! (x :: xs) | .xs | refl = refl
+-- (b)
+lem-tab-! : forall {A n} (xs : Vec A n) → tabulate (_!_ xs) == xs
+lem-tab-! []        = refl
+lem-tab-! (x :: xs) with tabulate (_!_ xs) | lem-tab-! xs
+lem-tab-! (x :: xs) | .xs | refl = refl
 
-  -- Exercise 2.3
+-- Exercise 2.3
 
-  -- (a)
-  ⊆-refl : {A : Set} {xs : List A} → xs ⊆ xs
-  ⊆-refl {xs = []}      = stop
-  ⊆-refl {xs = x :: xs} = keep (⊆-refl {xs = xs})
+-- (a)
+⊆-refl : {A : Set} {xs : List A} → xs ⊆ xs
+⊆-refl {xs = []}      = stop
+⊆-refl {xs = x :: xs} = keep (⊆-refl {xs = xs})
 
-  ⊆-trans : {A : Set} {xs ys zs : List A} → 
-    xs ⊆ ys → ys ⊆ zs → xs ⊆ zs
-  ⊆-trans stop     q = q
-  ⊆-trans (drop xs⊆ys) (drop y∷ys⊆zs) = drop (⊆-trans (drop xs⊆ys) y∷ys⊆zs) -- xs ⊆ z :: zs
-  ⊆-trans (drop xs⊆ys) (keep ys⊆zs)   = drop (⊆-trans       xs⊆ys    ys⊆zs) --⊆-trans xs⊆ys (drop ys⊆zs) -- xs ⊆ y :: zs
-  ⊆-trans (keep xs⊆ys) (drop x∷ys⊆zs) = drop (⊆-trans (keep xs⊆ys) x∷ys⊆zs) -- x :: xs ⊆ y :: zs
-  ⊆-trans (keep xs⊆ys) (keep ys⊆zs)   = keep (⊆-trans       xs⊆ys    ys⊆zs) -- x :: xs ⊆ x :: zs
-  {-
-  ⊆-trans  stop    q        = q
-  ⊆-trans (drop p) (drop q) = drop (⊆-trans (drop p) q) 
-  ⊆-trans (drop p) (keep q) = ⊆-trans p (drop q)
-  ⊆-trans (keep p) (drop q) = drop (⊆-trans (keep p) q)
-  ⊆-trans (keep p) (keep q) = keep (⊆-trans p q)
-  -}
+⊆-trans : {A : Set} {xs ys zs : List A} → 
+  xs ⊆ ys → ys ⊆ zs → xs ⊆ zs
+⊆-trans stop     q = q
+⊆-trans (drop xs⊆ys) (drop y∷ys⊆zs) = drop (⊆-trans (drop xs⊆ys) y∷ys⊆zs) -- xs ⊆ z :: zs
+⊆-trans (drop xs⊆ys) (keep ys⊆zs)   = drop (⊆-trans       xs⊆ys    ys⊆zs) --⊆-trans xs⊆ys (drop ys⊆zs) -- xs ⊆ y :: zs
+⊆-trans (keep xs⊆ys) (drop x∷ys⊆zs) = drop (⊆-trans (keep xs⊆ys) x∷ys⊆zs) -- x :: xs ⊆ y :: zs
+⊆-trans (keep xs⊆ys) (keep ys⊆zs)   = keep (⊆-trans       xs⊆ys    ys⊆zs) -- x :: xs ⊆ x :: zs
+{-
+⊆-trans  stop    q        = q
+⊆-trans (drop p) (drop q) = drop (⊆-trans (drop p) q) 
+⊆-trans (drop p) (keep q) = ⊆-trans p (drop q)
+⊆-trans (keep p) (drop q) = drop (⊆-trans (keep p) q)
+⊆-trans (keep p) (keep q) = keep (⊆-trans p q)
+-}
 
-  infixr 30 _::_
-  data SubList {A : Set} : List A → Set where
-    []   : SubList []
-    _::_ : forall x {xs} → SubList xs → SubList (x :: xs)
-    skip : forall {x xs} → SubList xs → SubList (x :: xs)
+infixr 30 _::s_
+data SubList {A : Set} : List A → Set where
+  []   : SubList []
+  _::s_ : forall x {xs} → SubList xs → SubList (x :: xs) 
+    -- renaming _::_ to _::s_ to avoid confusion
+  skip : forall {x xs} → SubList xs → SubList (x :: xs)
 
+ex1 : List Nat
+ex1 = 2 :: 3 :: 4 :: 5 :: []
+
+ex1-sub : SubList ex1
+ex1-sub = 2 ::s skip (skip (5 ::s []))
+
+-- (b)
+forget : {A : Set}{xs : List A} → SubList xs → List A
+forget []         = []
+forget (x ::s sl) = x :: forget sl
+forget (skip sl)  = forget sl
+
+-- (c)
+lem-forget : {A : Set}{xs : List A}
+             (zs : SubList xs) → forget zs ⊆ xs
+lem-forget []         = stop
+lem-forget (x ::s zs) = keep (lem-forget zs)
+lem-forget (skip zs)  = drop (lem-forget zs)
+
+-- (d)
+filter' : {A : Set} → (A → Bool) → (xs : List A) → SubList xs
+filter' p []        = []
+filter' p (x :: xs) with p x
+filter' p (x :: xs) | true  = x ::s filter' p xs
+filter' p (x :: xs) | false = skip (filter' p xs)
+
+-- (e)
+complement : {A : Set}{xs : List A} → SubList xs → SubList xs
+complement []         = []
+complement {A} {x :: xs} (.x ::s zs) = skip (complement zs)
+complement {A} {x :: xs} (skip zs)   = x ::s complement zs
+
+cpl = complement ex1-sub
+
+-- (f)
+sublists : {A : Set}(xs : List A) → List (SubList xs)
+sublists xs = ?
+  
