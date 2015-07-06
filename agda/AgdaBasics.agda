@@ -424,7 +424,7 @@ temp2 = transpose ((2 :: 4 :: 6 :: []) :: [])
 -- (a)
 lem-!-tab : forall {A n} (f : Fin n → A)(i : Fin n) → tabulate f ! i == f i
 lem-!-tab f fzero    = refl
-lem-!-tab f (fsuc i) = lem-!-tab (f ∘ fsuc) i 
+lem-!-tab {A = B} {n = suc x} f (fsuc i) = lem-!-tab (f ∘ fsuc) i
 
 {-
 f        : [Fin (suc n)] → A
@@ -503,7 +503,10 @@ complement {A} {x :: xs} (skip zs)   = x ::s complement zs
 
 cpl = complement ex1-sub
 
+
 -- (f)
 sublists : {A : Set}(xs : List A) → List (SubList xs)
-sublists xs = ?
-  
+sublists [] = [] :: []
+sublists (x :: xs) = map (λ zs → skip zs) (sublists xs) 
+                  ++ map (λ zs → x ::s zs) (sublists xs)
+
