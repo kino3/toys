@@ -96,6 +96,9 @@ apply2 :          (B : Bool → Set) → ((x : Bool) → B x) → (a : Bool) →
 apply2 B f true = f true
 apply2 B f false = f false
 
+harada : Bool
+harada = true
+
 identity2 : (A : Set) → A → A
 identity2 = λ(A : Set) x → x
 
@@ -444,8 +447,13 @@ lem-tab-! (x :: xs) | .xs | refl = refl
 
 -- (a)
 ⊆-refl : {A : Set} {xs : List A} → xs ⊆ xs
+⊆-refl {A} {[]}          = stop
+⊆-refl {A} {a :: a-list} = keep (⊆-refl {A} {a-list})
+
+{-
 ⊆-refl {xs = []}      = stop
 ⊆-refl {xs = x :: xs} = keep (⊆-refl {xs = xs})
+-}
 
 ⊆-trans : {A : Set} {xs ys zs : List A} → 
   xs ⊆ ys → ys ⊆ zs → xs ⊆ zs
