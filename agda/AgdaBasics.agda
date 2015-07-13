@@ -483,6 +483,7 @@ ex1 = 2 :: 3 :: 4 :: 5 :: []
 ex1-sub : SubList ex1
 ex1-sub = 2 ::s skip (skip (5 ::s []))
 
+
 -- (b)
 forget : {A : Set}{xs : List A} → SubList xs → List A
 forget []         = []
@@ -505,7 +506,7 @@ filter' p (x :: xs) | false = skip (filter' p xs)
 
 -- (e)
 complement : {A : Set}{xs : List A} → SubList xs → SubList xs
-complement []         = []
+complement {A} {[]}      []          = []
 complement {A} {x :: xs} (.x ::s zs) = skip (complement zs)
 complement {A} {x :: xs} (skip zs)   = x ::s complement zs
 
