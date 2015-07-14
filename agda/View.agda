@@ -46,4 +46,25 @@ data Find {A : Set}(p : A → Bool) : List A → Set where
 
 find₁ : {A : Set}(p : A → Bool)(xs : List A) → Find p xs
 find₁ p []       = not-found all[]
-find₁ p (x ∷ xs) = {!!}
+find₁ p (x ∷ xs) with p x
+find₁ p (x ∷ xs) | true  = found [] x {!!} xs
+find₁ p (x ∷ xs) | false = {!!}
+
+data _==_ {A : Set}(x : A) : A → Set where
+  refl : x == x
+
+data Inspect {A : Set}(x : A) : Set where
+  it : (y : A) → x == y → Inspect x
+
+inspect : {A : Set}(x : A) → Inspect x
+inspect x = it x refl
+
+trueIsTrue : {x : Bool} → x == true → isTrue x
+trueIsTrue refl = _
+
+isFalse : Bool → Set
+isFalse x = isTrue (not x)
+
+falseIsFalse : {x : Bool} → x == false → isFalse x
+falseIsFalse refl = _
+
