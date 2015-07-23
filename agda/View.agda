@@ -31,7 +31,7 @@ open import Data.Bool renaming (T to isTrue)
 
 infixr 30 _:all:_
 data All {A : Set}(P : A → Set) : List A → Set where
-  all[] : All P []
+  all[]   : All P []
   _:all:_ : ∀ {x xs} → P x → All P xs → All P (x ∷ xs)
 
 
@@ -44,11 +44,25 @@ data Find {A : Set}(p : A → Bool) : List A → Set where
   not-found : ∀ {xs} → All (satisfies (not ∘ p)) xs 
               → Find p xs
 
+sample : List Nat
+sample = 3 ∷ 5 ∷ 2 ∷ 1 ∷ 4 ∷ []
+
+prop : Nat → Bool
+prop 2 = true
+prop 4 = true
+prop _ = false
+
+open import Data.Unit 
+findsample : Find prop sample
+findsample = found (3 ∷ 5 ∷ []) 2 tt (1 ∷ 4 ∷ [])
+
+{-
 find₁ : {A : Set}(p : A → Bool)(xs : List A) → Find p xs
 find₁ p []       = not-found all[]
 find₁ p (x ∷ xs) with p x
 find₁ p (x ∷ xs) | true  = found [] x {!!} xs
 find₁ p (x ∷ xs) | false = {!!}
+-}
 
 data _==_ {A : Set}(x : A) : A → Set where
   refl : x == x
@@ -68,3 +82,8 @@ isFalse x = isTrue (not x)
 falseIsFalse : {x : Bool} → x == false → isFalse x
 falseIsFalse refl = _
 
+find : {A : Set}(p : A → Bool)(xs : List A) → Find p xs
+find p []       = not-found all[]
+find p (x ∷ xs) with inspect (p x)
+... | it true  prf = found {!!} {!!} {!!} {!!}
+... | it false prf = {!!}
