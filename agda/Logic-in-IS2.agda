@@ -7,12 +7,16 @@ module Logic-in-IS2 where
 -- とりあえずＬＫのところまでかいてみる。
 module Semantics where
 
+open import Data.Bool 
+  renaming (true to t; false to f;_∧_ to _and_;_∨_ to _or_)
+
 --data 命題変数 : Set where
 --  p q r : 命題変数
+命題変数 = Bool
 
 -- 定義1.1
 data 論理式 : Set where
-  --<_> : 命題変数 → 論理式
+  <_> : 命題変数 → 論理式
   ⊤ ⊥ : 論理式
   _∧_ : 論理式 → 論理式 → 論理式
   _∨_ : 論理式 → 論理式 → 論理式
@@ -25,68 +29,83 @@ infix 100 ¬_
 例1-1 : (p q r : 論理式) → 論理式
 例1-1 p q r = p ⊃ ( q ∨ ¬ r )
 
-open import Data.Bool 
-  renaming (true to t; false to f;_∧_ to _and_;_∨_ to _or_)
 
 -- P.9
 
---付値' = 命題変数 → Bool
+付値' = 命題変数 → Bool
+
 {-
 record 付値 : Set where
   constructor _+_
   field
     f1 : 命題変数 → Bool
-    f2 : {v : 命題変数 → Bool} → 論理式 → Bool
+    f2 : 論理式 → Bool
 -}
-open import Data.Product renaming (_,_ to _&_;_×_ to _かつ_)
+
+open import Data.Product renaming (_,_ to _&_)
 --拡張
 付値 = 論理式 → Bool
-
 {-
-付値 {v} < x > = v x
-付値 {v} (A ∧ B) with 付値 {v} A | 付値 {v} B
+付値 < x > = x
+付値 (A ∧ B) with 付値 A | 付値 B
 ... | t | t = t
 ... | t | f = f
 ... | f | t = f
 ... | f | f = f
-付値 {v} (A ∨ B) with 付値 {v} A | 付値 {v} B
+付値 (A ∨ B) with 付値 A | 付値 B
 ... | t | t = t
 ... | t | f = t
 ... | f | t = t
 ... | f | f = f
-付値 {v} (A ⊃ B) with 付値 {v} A | 付値 {v} B
+付値 (A ⊃ B) with 付値 A | 付値 B
 ... | t | t = t
 ... | t | f = f
 ... | f | t = t
 ... | f | f = t
-付値 {v} (¬ A) with 付値 {v} A
+付値 (¬ A) with 付値 A
 ... | t = f
 ... | f = t
 付値 ⊤ = t
 付値 ⊥ = f
 -}
-open import Relation.Binary.Core renaming (_≡_ to _≈_)
+
+--open import Relation.Binary.Core renaming (_≡_ to _≈_)
 -- ≡はあとで定義したいのでrenameする。
 
 
 -- 必要十分条件
+{-
 _⇔_ : Set → Set → Set
 A ⇔ B = (A → B) かつ (B → A)
 infix 1 _⇔_
+-}
+--open import Data.Sum renaming (_⊎_ to _または_)
 
-open import Data.Sum renaming (_⊎_ to _または_)
+{-
+data _≈_ : Bool → Bool → Set where
+  refl : ∀ b → b ≈ b
+  p1   : {A B : 論理式}{v : 付値} → v(A ∧ B) ≈ t → v(A) ≈ t
+  p2   : {A B : 論理式}{v : 付値} → v(A ∧ B) ≈ t → v(B) ≈ t
+  p3   : {A B : 論理式}{v : 付値} → v(A) ≈ t → v(B) ≈ t → v(A ∧ B) ≈ t 
+  ∨-intro1 : {A B : 論理式}{v : 付値} → v(A ∨ B) ≈ t ⇔ v(A) ≈ t または v(B) ≈ t
+-}
 
-postulate
-  p1 : {A B : 論理式}{v : 付値} → v(A ∧ B) ≈ t ⇔ v(A) ≈ t かつ v(B) ≈ t
-  p2 : {A B : 論理式}{v : 付値} → v(A ∨ B) ≈ t ⇔ v(A) ≈ t または v(B) ≈ t
-  p3 : {A B : 論理式}{v : 付値} → v(A ⊃ B) ≈ t ⇔ v(A) ≈ f または v(B) ≈ t
-  p4 : {A : 論理式}  {v : 付値} → v(¬ A)   ≈ t ⇔ v(A) ≈ f
+
+data _≈_ : Bool → Bool → Set where
+  refl : ∀ b → b ≈ b
+  p1 : {A B : 論理式}{v : 付値} → v(A ∧ B) ≈ v(A) and v(B)
+  p2 : {A B : 論理式}{v : 付値} → v(A ∨ B) ≈ v(A) or v(B)
+  p3 : {A B : 論理式}{v : 付値} → v(A ⊃ B) ≈ not(v(A)) or v(B)
+  p4 : {A : 論理式}  {v : 付値} → v(¬ A)   ≈ not(v(A))
+infix 1 _≈_
+
+--v = 付値
 
 トートロジー : 論理式 → Set
 トートロジー A = (v : 付値) → v(A) ≈ t
 
 充足可能 : 論理式 → Set
-充足可能 A = Σ 付値 (λ v → v(A) ≈ t)
+充足可能 A = Σ[ v ∈ 付値 ] v(A) ≈ t --Σ 付値 (λ v → v(A) ≈ t)
 
 論理式_が_である : 論理式 → (論理式 → Set) → Set
 論理式 a が P である = P a
@@ -100,12 +119,13 @@ postulate
 
 
 例1-3 : ∀ {p q} → 論理式 ((p ∧ (p ⊃ q)) ⊃ q) が トートロジー である
-例1-3 {p} {q} v with v p | v q
-例1-3 v | t | t = proj₂ (p3 & p3)
+例1-3 {p} {q} v = ?
+{-
+例1-3 {p} {q} v | t | t = p3 {A = p ∧ (p ⊃ q)} {B = q} {v = {!v!}}
 例1-3 v | t | f = {!!}
 例1-3 v | f | t = {!!}
 例1-3 v | f | f = {!!}
-
+-}
 {-
 例1-3 v with v p | v q 
 例1-3 v | t | t = refl
