@@ -18,6 +18,14 @@ parity (suc n) with parity n
 parity (suc .(k * 2))       | even k = odd k
 parity (suc .(suc (k * 2))) | odd  k = even (suc k)
 
+{-
+parity2 : (n : Nat) → Parity n
+parity2 zero    = even zero
+parity2 (suc n) with parity2 n
+parity2 (suc .(k * 2))       | even k = {!!}
+parity2 (suc .(suc (k * 2))) | odd k  = {!!}
+-}
+
 half : Nat → Nat
 half n with parity n
 half .(k * 2)       | even k = k
@@ -52,17 +60,24 @@ prop 2 = true
 prop 4 = true
 prop _ = false
 
-open import Data.Unit 
+p : Nat → Set
+p n = isTrue (prop n)
+
+open import Data.Unit
+
+ponyo : All p sample
+ponyo = {!!} :all: {!!} :all: tt :all: {!!} :all: tt :all: all[]
+
 findsample : Find prop sample
 findsample = found (3 ∷ 5 ∷ []) 2 tt (1 ∷ 4 ∷ [])
 
-{-
+
 find₁ : {A : Set}(p : A → Bool)(xs : List A) → Find p xs
 find₁ p []       = not-found all[]
 find₁ p (x ∷ xs) with p x
 find₁ p (x ∷ xs) | true  = found [] x {!!} xs
 find₁ p (x ∷ xs) | false = {!!}
--}
+
 
 data _==_ {A : Set}(x : A) : A → Set where
   refl : x == x
@@ -74,16 +89,20 @@ inspect : {A : Set}(x : A) → Inspect x
 inspect x = it x refl
 
 trueIsTrue : {x : Bool} → x == true → isTrue x
-trueIsTrue refl = _
+trueIsTrue refl = tt
 
 isFalse : Bool → Set
 isFalse x = isTrue (not x)
 
 falseIsFalse : {x : Bool} → x == false → isFalse x
-falseIsFalse refl = _
+falseIsFalse refl = tt
 
 find : {A : Set}(p : A → Bool)(xs : List A) → Find p xs
 find p []       = not-found all[]
 find p (x ∷ xs) with inspect (p x)
-... | it true  prf = found {!!} {!!} {!!} {!!}
-... | it false prf = {!!}
+... | it true  prf = found [] x (trueIsTrue prf) xs
+... | it false prf with find p xs
+find p (x ∷ .(xs ++ y ∷ ys)) | it false prf | found xs y py ys 
+  = found (x ∷ xs) y py ys
+find p (x ∷ xs)              | it false prf | not-found npxs     
+  = not-found (falseIsFalse prf :all: npxs)
