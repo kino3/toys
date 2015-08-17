@@ -40,53 +40,24 @@ open import Data.Product renaming (_,_ to _&_)
 
 piyo : {v : 命題変数 → Bool} → 論理式 → Bool
 piyo {v} < x > = v x
-piyo {v} (A ∧ B) with piyo {v} A | piyo {v}B
-... | t | t = t
-... | t | f = f
-... | f | t = f
-... | f | f = f
-piyo {v} (A ∨ B) with piyo {v} A | piyo {v} B
-... | t | t = t
-... | t | f = t
-... | f | t = t
-... | f | f = f
+piyo {v} (A ∧ B) = piyo {v} A and piyo {v} B
+piyo {v} (A ∨ B) = piyo {v} A or  piyo {v} B
 piyo {v} (A ⊃ B) = not (piyo {v} A) or piyo {v} B
-piyo {v}(¬ A) with piyo {v} A
-... | t = f
-... | f = t
+piyo {v}(¬ A) = not (piyo {v} A)
 piyo ⊤ = t
 piyo ⊥ = f
 
-
 open import Relation.Binary.Core renaming (_≡_ to _≈_)
 -- ≡はあとで定義したいのでrenameする。
---付値 : Set
---付値 = Σ 付値' (λ x → 論理式 → Bool)
-
--- 必要十分条件
-{-
-_⇔_ : Set → Set → Set
-A ⇔ B = (A → B) かつ (B → A)
-infix 1 _⇔_
--}
---open import Data.Sum renaming (_⊎_ to _または_)
-
-
-{-
-postulate
-  p1 : (A B : 論理式)(v : 付値) → v(A ∧ B) ≈ v(A) and v(B)
-  p2 : (A B : 論理式)(v : 付値) → v(A ∨ B) ≈ v(A) or v(B)
-  p3 : (A B : 論理式)(v : 付値) → v(A ⊃ B) ≈ not(v(A)) or v(B)
-  p4 : (A : 論理式)  (v : 付値) → v(¬ A)   ≈ not(v(A))
-  p5 : (v : 付値) → v(⊤) ≈ t
-  p6 : (v : 付値) → v(⊥) ≈ f
--}
 
 open import Relation.Nullary
 open import Relation.Binary.PropositionalEquality
 
 トートロジー : 論理式 → Set
 トートロジー A = (w : 付値') → Σ[ v ∈ (論理式 → Bool)] v(A) ≈ t
+
+トートロジー2 : 論理式 → Set
+トートロジー2 A = (w : 付値') → Σ[ v ∈ (論理式 → Bool)] v(A) ≈ t --
 
 {-
 充足可能 : 論理式 → Set
@@ -117,6 +88,13 @@ open import Data.Unit
     lemma prf with v(x)
     lemma prf | t = refl
     lemma prf | f = refl
+
+{-
+例1' : ∀ p → 論理式 (< p > ⊃ < p >) が トートロジー2 である
+例1' x v with Dec (v(x) ≈ t)
+例1' x v | z = {!!}
+-}
+
 
 {-
 

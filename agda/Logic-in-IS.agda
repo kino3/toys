@@ -28,34 +28,17 @@ open import Data.Bool
   renaming (true to t; false to f;_∧_ to _and_;_∨_ to _or_)
 
 -- P.9
-付値' = 命題変数 → Bool
+付値 = 命題変数 → Bool
 
--- 論理式の付値をさだめるときは、暗黙的に命題変数の付値がなにかしら決まっている世界を考えている。
--- そのため、{v : 付値} がある。これがないと< x >のときを定義できない。
---拡張
-
-論理式付値 : {v : 付値'} → 論理式 → Bool
-論理式付値 {v} < x > = v x
-論理式付値 {v} (A ∧ B) with 論理式付値 {v} A | 論理式付値 {v} B
-... | t | t = t
-... | t | f = f
-... | f | t = f
-... | f | f = f
-論理式付値 {v} (A ∨ B) with 論理式付値 {v} A | 論理式付値 {v} B
-... | t | t = t
-... | t | f = t
-... | f | t = t
-... | f | f = f
-論理式付値 {v} (A ⊃ B) with 論理式付値 {v} A | 論理式付値 {v} B
-... | t | t = t
-... | t | f = f
-... | f | t = t
-... | f | f = t
-論理式付値 {v} (¬ A) with 論理式付値 {v} A
-... | t = f
-... | f = t
-論理式付値 ⊤ = t
-論理式付値 ⊥ = f
+--論理式への拡張
+⟦_⟧_ :  論理式 → 付値 → Bool
+⟦ < x > ⟧ v  = v(x)
+⟦ ⊤ ⟧ v      = t
+⟦ ⊥ ⟧ v      = f
+⟦ A ∧ B ⟧ v = ⟦ A ⟧ v and ⟦ B ⟧ v 
+⟦ A ∨ B ⟧ v = ⟦ A ⟧ v or  ⟦ B ⟧ v 
+⟦ A ⊃ B ⟧ v = not (⟦ A ⟧ v) or  ⟦ B ⟧ v 
+⟦ ¬ A ⟧ v   = not (⟦ A ⟧ v)
 
 open import Relation.Binary.Core renaming (_≡_ to _≈_)
 -- ≡はあとで定義したいのでrenameする。
@@ -65,13 +48,11 @@ open import Data.Product using (Σ;_×_) renaming (_,_ to _&_)
 _⇔_ : Set → Set → Set
 A ⇔ B = (A → B) × (B → A)
 
-付値 = 論理式 → Bool
-
 トートロジー : 論理式 → Set
-トートロジー A = (v : 付値) → v(A) ≈ t
+トートロジー A = (v : 付値) → ⟦ A ⟧ v ≈ t
 
 充足可能 : 論理式 → Set
-充足可能 A = Σ 付値 (λ v → v(A) ≈ t)
+充足可能 A = Σ 付値 (λ v → ⟦ A ⟧ v ≈ t)
 
 論理式_が_である : 論理式 → (論理式 → Set) → Set
 論理式 a が P である = P a
@@ -83,16 +64,13 @@ A ⇔ B = (A → B) × (B → A)
 -- 与えられた論理式がトートロジーか否かは決定可能である。
 -}
 
-
 例1-3 : 論理式 ((< p > ∧ (< p > ⊃ < q >)) ⊃ < q > ) が トートロジー である
-例1-3 v = {!!}
-{-
 例1-3 v with v p | v q 
 例1-3 v | t | t = refl
 例1-3 v | t | f = refl
 例1-3 v | f | t = refl
 例1-3 v | f | f = refl
--}
+
 {-
 -- めんどくさいが、論理式の形とその評価した値とを厳密に区別することはだいじ。
 -- refl ではなくeqreasoningをつかってみるのもいいかもしれない。
@@ -119,8 +97,8 @@ infix 1 _≡_
 
 infix 0 _⇔_
 open import Data.Empty
-問1-4 : {v : 付値} {A B : 論理式} → 論理式付値 {v} (A ≡ B) ≈ t ⇔ 論理式付値 {v} A ≈ 論理式付値 {v} B
-問1-4 {v} {A} {B} with 論理式付値 {v} A | 論理式付値 {v} B
+問1-4 : {v : 付値} {A B : 論理式} → ⟦_⟧_ {v} (A ≡ B) ≈ t ⇔ ⟦_⟧_ {v} A ≈ ⟦_⟧_ {v} B
+問1-4 {v} {A} {B} with ⟦_⟧_ {v} A | ⟦_⟧_ {v} B
 問1-4 | t | t = (λ x → refl) & (λ x → refl)
 問1-4 | t | f = (λ ()) & (λ ())
 問1-4 | f | t = (λ ()) & (λ ())
@@ -136,7 +114,7 @@ open import Data.Empty
 -}
 
 定理1-3-1a : ∀ A → (A ∧ A ≡ A) は トートロジー である
-定理1-3-1a A v with 論理式付値 {v} A
+定理1-3-1a A v with ⟦_⟧_ {v} A
 定理1-3-1a A v | t = refl
 定理1-3-1a A v | f = refl
 
