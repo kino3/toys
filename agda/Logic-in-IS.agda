@@ -6,13 +6,14 @@ module Logic-in-IS where
 -- とりあえずＬＫのところまでかいてみる。
 module Semantics where
 
-data 命題変数 : Set where
-  p q r : 命題変数
+open import Data.Char
+命題変数 = Char
 
 -- 定義1.1
 data 論理式 : Set where
   <_> : 命題変数 → 論理式
-  ⊤ ⊥ : 論理式
+  ⊤ : 論理式
+  ⊥ : 論理式
   _∧_ : 論理式 → 論理式 → 論理式
   _∨_ : 論理式 → 論理式 → 論理式
   _⊃_ : 論理式 → 論理式 → 論理式
@@ -22,7 +23,7 @@ infix 100 ¬_
 
 -- 例1.1
 例1-1 : 論理式
-例1-1 = < p > ⊃ ( < q > ∨ ¬ < r >)
+例1-1 = < 'p' > ⊃ ( < 'q' > ∨ ¬ < 'r' >)
 
 open import Data.Bool 
   renaming (true to t; false to f;_∧_ to _and_;_∨_ to _or_)
@@ -31,28 +32,29 @@ open import Data.Bool
 付値 = 命題変数 → Bool
 
 --論理式への拡張
-⟦_⟧_ :  論理式 → 付値 → Bool
-⟦ < x > ⟧ v  = v(x)
-⟦ ⊤ ⟧ v      = t
-⟦ ⊥ ⟧ v      = f
-⟦ A ∧ B ⟧ v = ⟦ A ⟧ v and ⟦ B ⟧ v 
-⟦ A ∨ B ⟧ v = ⟦ A ⟧ v or  ⟦ B ⟧ v 
-⟦ A ⊃ B ⟧ v = not (⟦ A ⟧ v) or  ⟦ B ⟧ v 
-⟦ ¬ A ⟧ v   = not (⟦ A ⟧ v)
+_⟦_⟧ : 付値 → 論理式 → Bool
+v ⟦ < x > ⟧   = v(x)
+v ⟦ ⊤ ⟧       = t
+v ⟦ ⊥ ⟧       = f
+v ⟦ A ∧ B ⟧   = v ⟦ A ⟧ and v ⟦ B ⟧  
+v ⟦ A ∨ B ⟧   = v ⟦ A ⟧ or  v ⟦ B ⟧ 
+v ⟦ A ⊃ B ⟧   = not (v ⟦ A ⟧) or v ⟦ B ⟧
+v ⟦ ¬ A ⟧     = not (v ⟦ A ⟧)
 
 open import Relation.Binary.Core renaming (_≡_ to _≈_)
 -- ≡はあとで定義したいのでrenameする。
 
-open import Data.Product using (Σ;_×_) renaming (_,_ to _&_)
+open import Data.Product renaming (_,_ to _&_)
 -- 必要十分条件
 _⇔_ : Set → Set → Set
 A ⇔ B = (A → B) × (B → A)
+infix 0 _⇔_
 
 トートロジー : 論理式 → Set
-トートロジー A = (v : 付値) → ⟦ A ⟧ v ≈ t
+トートロジー A = (v : 付値) → v ⟦ A ⟧ ≈ t
 
 充足可能 : 論理式 → Set
-充足可能 A = Σ 付値 (λ v → ⟦ A ⟧ v ≈ t)
+充足可能 A = Σ[ v ∈ 付値 ] v ⟦ A ⟧ ≈ t
 
 論理式_が_である : 論理式 → (論理式 → Set) → Set
 論理式 a が P である = P a
@@ -64,65 +66,54 @@ A ⇔ B = (A → B) × (B → A)
 -- 与えられた論理式がトートロジーか否かは決定可能である。
 -}
 
-例1-3 : 論理式 ((< p > ∧ (< p > ⊃ < q >)) ⊃ < q > ) が トートロジー である
-例1-3 v with v p | v q 
+例1-3 : 論理式 ((< 'p' > ∧ (< 'p' > ⊃ < 'q' >)) ⊃ < 'q' > ) が トートロジー である
+例1-3 v with v('p') | v('q') 
 例1-3 v | t | t = refl
 例1-3 v | t | f = refl
 例1-3 v | f | t = refl
 例1-3 v | f | f = refl
 
-{-
 -- めんどくさいが、論理式の形とその評価した値とを厳密に区別することはだいじ。
 -- refl ではなくeqreasoningをつかってみるのもいいかもしれない。
 
-問1-2 : (((< p > ∨ < q >) ⊃ < r >) ∨ (< p > ∧ < q >)) は 充足可能 である
-問1-2 = v & refl --refl
+問1-2 : 論理式 (((< 'p' > ∨ < 'q' >) ⊃ < 'r' >) ∨ (< 'p' > ∧ < 'q' >)) が 充足可能 である
+問1-2 = v & refl
   where
    v : 付値
-   v p = f
-   v q = t
-   v r = t
-   {-
-   v p = f
-   v q = f
-   v r = t
-   -}
+   v 'p' = f
+   v 'q' = t
+   v 'r' = t
+   v _ = t
 
 -- equivalent
 _≡_ : 論理式 → 論理式 → 論理式
 A ≡ B = (A ⊃ B) ∧ (B ⊃ A)
-
 infix 1 _≡_
 
-
-infix 0 _⇔_
-open import Data.Empty
-問1-4 : {v : 付値} {A B : 論理式} → ⟦_⟧_ {v} (A ≡ B) ≈ t ⇔ ⟦_⟧_ {v} A ≈ ⟦_⟧_ {v} B
-問1-4 {v} {A} {B} with ⟦_⟧_ {v} A | ⟦_⟧_ {v} B
+--open import Data.Empty
+問1-4 : {v : 付値} {A B : 論理式} → v ⟦ (A ≡ B) ⟧ ≈ t ⇔ v ⟦ A ⟧ ≈ v ⟦ B ⟧
+問1-4 {v} {A} {B} with v ⟦ A ⟧ | v ⟦ B ⟧
 問1-4 | t | t = (λ x → refl) & (λ x → refl)
 問1-4 | t | f = (λ ()) & (λ ())
 問1-4 | f | t = (λ ()) & (λ ())
 問1-4 | f | f = (λ x → refl) & (λ x → refl)
 
-{-
-問1-5 : {A B : 論理式} (v : 論理式 → Bool) → v (A ≡ B) ≈ v ((A ∧ B) ∨ (¬ A ∧ ¬ B))
-問1-5 {A} {B} v with v A | v B
+問1-5 : {A B : 論理式} (v : 付値) → v ⟦ A ≡ B ⟧ ≈ v ⟦(A ∧ B) ∨ (¬ A ∧ ¬ B)⟧
+問1-5 {A} {B} v with v ⟦ A ⟧ | v ⟦ B ⟧
 問1-5 v | t | t = refl
 問1-5 v | t | f = refl
 問1-5 v | f | t = refl
 問1-5 v | f | f = refl
--}
 
-定理1-3-1a : ∀ A → (A ∧ A ≡ A) は トートロジー である
-定理1-3-1a A v with ⟦_⟧_ {v} A
+定理1-3-1a : ∀ A → 論理式 (A ∧ A ≡ A) が トートロジー である
+定理1-3-1a A v with v ⟦ A ⟧
 定理1-3-1a A v | t = refl
 定理1-3-1a A v | f = refl
 
-toi1-1 : ∀ A B → (A ⊃ B) は 充足可能 である 
-               → A は 充足可能 である 
-               → B は 充足可能 である
-toi1-1 A B (v & eq) (w & eq2) = {!!} & {!!}
--}
+定理1-3-1b : ∀ A → 論理式 (A ∨ A ≡ A) が トートロジー である
+定理1-3-1b A v with v ⟦ A ⟧
+定理1-3-1b A v | t = refl
+定理1-3-1b A v | f = refl
 
 module LK where
 -- P.23
