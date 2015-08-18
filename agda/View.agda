@@ -31,11 +31,18 @@ half n with parity n
 half .(k * 2)       | even k = k
 half .(suc (k * 2)) | odd  k = k
 
+open import Data.Bool renaming (T to isTrue)
+isEven : Nat → Bool
+isEven n with parity n
+isEven .(k * 2)       | even k = true
+isEven .(suc (k * 2)) |  odd k = false
+
+
 -- Finding an element in a list
 
 open import Function using (_∘_)
 open import Data.List
-open import Data.Bool renaming (T to isTrue)
+
 
 infixr 30 _:all:_
 data All {A : Set}(P : A → Set) : List A → Set where
@@ -60,24 +67,32 @@ prop 2 = true
 prop 4 = true
 prop _ = false
 
-p : Nat → Set
-p n = isTrue (prop n)
-
 open import Data.Unit
+open import Data.Empty
+
+p : Nat → Set
+p 2 = ⊤ --isTrue (prop n)
+p _ = ⊥
 
 ponyo : All p sample
-ponyo = {!!} :all: {!!} :all: tt :all: {!!} :all: tt :all: all[]
+ponyo = {!!} :all: {!!} :all: tt :all: {!!} :all: {!!} :all: all[]
 
 findsample : Find prop sample
-findsample = found (3 ∷ 5 ∷ []) 2 tt (1 ∷ 4 ∷ [])
+findsample = found (3 ∷ 5 ∷ []) 2 {!!} (1 ∷ 4 ∷ [])
 
+sample2 : List Nat
+sample2 = 3 ∷ 5 ∷ 1 ∷ []
 
+findsample2 : Find prop sample2
+findsample2 = not-found (tt :all: (tt :all: (tt :all: all[])))
+
+{-
 find₁ : {A : Set}(p : A → Bool)(xs : List A) → Find p xs
 find₁ p []       = not-found all[]
 find₁ p (x ∷ xs) with p x
 find₁ p (x ∷ xs) | true  = found [] x {!!} xs
 find₁ p (x ∷ xs) | false = {!!}
-
+-}
 
 data _==_ {A : Set}(x : A) : A → Set where
   refl : x == x
@@ -90,6 +105,9 @@ inspect x = it x refl
 
 trueIsTrue : {x : Bool} → x == true → isTrue x
 trueIsTrue refl = tt
+
+harada : Inspect 3
+harada = it 3 refl
 
 isFalse : Bool → Set
 isFalse x = isTrue (not x)
@@ -106,3 +124,40 @@ find p (x ∷ .(xs ++ y ∷ ys)) | it false prf | found xs y py ys
   = found (x ∷ xs) y py ys
 find p (x ∷ xs)              | it false prf | not-found npxs     
   = not-found (falseIsFalse prf :all: npxs)
+
+-- Indexing into a list
+data _∈_ {A : Set}(x : A) : List A → Set where
+  hd : ∀ {xs}   → x ∈ x ∷ xs
+  tl : ∀ {y xs} → x ∈ xs     → x ∈ y ∷ xs
+infix 4 _∈_
+
+index : ∀ {A}{x : A}{xs} → x ∈ xs → Nat
+index hd     = zero
+index (tl p) = suc (index p) 
+
+data Lookup {A : Set}(xs : List A) : Nat → Set where
+  inside : (x : A)(p : x ∈ xs) → Lookup xs (index p)
+  outside : (m : Nat) → Lookup xs (length xs + m)
+
+lkpsample : Lookup sample 0
+lkpsample = inside 3 hd
+
+lkpsample2 : Lookup sample 1
+lkpsample2 = inside 5 (tl hd)
+
+lkpsample3 : Lookup sample 2
+lkpsample3 = inside 2 (tl (tl hd))
+
+lkpsample4 : Lookup sample 5
+lkpsample4 = outside 0
+
+lkpsample5 : Lookup sample 8
+lkpsample5 = outside 3
+
+_!_ : {A : Set}(xs : List A)(n : Nat) → Lookup xs n
+[] ! n = outside n
+(x ∷ xs) ! zero  = inside x hd
+(x ∷ xs) ! suc n with xs ! n
+(x ∷ xs) ! suc .(index p)       | inside y p = inside y (tl p)
+(x ∷ xs) ! suc .(length xs + m) | outside m  = outside m
+
