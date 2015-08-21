@@ -4,6 +4,17 @@ module Logic-in-IS where
 -- http://www.nippyo.co.jp/book/1292.html
 
 -- とりあえずＬＫのところまでかいてみる。
+
+{-
+ 第1章 命題論理
+-}
+
+-------------------------
+-- 1.1 形式化ということ
+
+-------------------------
+-- 1.2 命題と論理式
+
 module Semantics where
 
 open import Data.Char
@@ -12,8 +23,8 @@ open import Data.Char
 -- 定義1.1
 data 論理式 : Set where
   <_> : 命題変数 → 論理式
-  ⊤ : 論理式
-  ⊥ : 論理式
+  ⊤ : 論理式 -- P.12 命題定数
+  ⊥ : 論理式 -- P.12 命題定数
   _∧_ : 論理式 → 論理式 → 論理式
   _∨_ : 論理式 → 論理式 → 論理式
   _⊃_ : 論理式 → 論理式 → 論理式
@@ -28,6 +39,10 @@ infix 100 ¬_
 open import Data.Bool 
   renaming (true to t; false to f;_∧_ to _and_;_∨_ to _or_)
 
+
+-------------------------
+-- 1.3 論理式と真偽
+
 -- P.9
 付値 = 命題変数 → Bool
 
@@ -41,7 +56,7 @@ v ⟦ A ∨ B ⟧   = v ⟦ A ⟧ or  v ⟦ B ⟧
 v ⟦ A ⊃ B ⟧   = not (v ⟦ A ⟧) or v ⟦ B ⟧
 v ⟦ ¬ A ⟧     = not (v ⟦ A ⟧)
 
-open import Relation.Binary.Core renaming (_≡_ to _≈_)
+open import Relation.Binary.PropositionalEquality renaming (_≡_ to _≈_) hiding ([_])
 -- ≡はあとで定義したいのでrenameする。
 
 open import Data.Product renaming (_,_ to _&_)
@@ -50,6 +65,7 @@ _⇔_ : Set → Set → Set
 A ⇔ B = (A → B) × (B → A)
 infix 0 _⇔_
 
+-- SetではなくDecなのではないか？
 トートロジー : 論理式 → Set
 トートロジー A = (v : 付値) → v ⟦ A ⟧ ≈ t
 
@@ -61,36 +77,29 @@ infix 0 _⇔_
 
 恒真 = トートロジー
 
-{-
--- 定理1.1
--- 与えられた論理式がトートロジーか否かは決定可能である。
--}
-
 例1-3 : 論理式 ((< 'p' > ∧ (< 'p' > ⊃ < 'q' >)) ⊃ < 'q' > ) が トートロジー である
 例1-3 v with v('p') | v('q') 
-例1-3 v | t | t = refl
-例1-3 v | t | f = refl
-例1-3 v | f | t = refl
-例1-3 v | f | f = refl
-
--- めんどくさいが、論理式の形とその評価した値とを厳密に区別することはだいじ。
--- refl ではなくeqreasoningをつかってみるのもいいかもしれない。
+... | t | t = refl
+... | t | f = refl
+... | f | t = refl
+... | f | f = refl
 
 問1-2 : 論理式 (((< 'p' > ∨ < 'q' >) ⊃ < 'r' >) ∨ (< 'p' > ∧ < 'q' >)) が 充足可能 である
 問1-2 = v & refl
   where
    v : 付値
-   v 'p' = f
-   v 'q' = t
+   v 'p' = t
+   v 'q' = f
    v 'r' = t
-   v _ = t
+   v _   = f
+-------------------------
+-- 1.4 論理的に同値な論理式
 
 -- equivalent
 _≡_ : 論理式 → 論理式 → 論理式
 A ≡ B = (A ⊃ B) ∧ (B ⊃ A)
 infix 1 _≡_
 
---open import Data.Empty
 問1-4 : {v : 付値} {A B : 論理式} → v ⟦ (A ≡ B) ⟧ ≈ t ⇔ v ⟦ A ⟧ ≈ v ⟦ B ⟧
 問1-4 {v} {A} {B} with v ⟦ A ⟧ | v ⟦ B ⟧
 問1-4 | t | t = (λ x → refl) & (λ x → refl)
@@ -114,6 +123,76 @@ infix 1 _≡_
 定理1-3-1b A v with v ⟦ A ⟧
 定理1-3-1b A v | t = refl
 定理1-3-1b A v | f = refl
+
+_と_は_である : 論理式 → 論理式 → (論理式 → 論理式 → Set) → Set
+A と B は P である = P A B
+
+論理的に同値 : 論理式 → 論理式 → Set
+論理的に同値 A B = 論理式 A ≡ B が トートロジー である
+
+
+_∼_ : 論理式 → 論理式 → Set
+A ∼ B = A と B は 論理的に同値 である
+
+定理1-4-1 : (A : 論理式) → A ∼ A
+定理1-4-1 A v with v ⟦ A ⟧
+定理1-4-1 A v | t = refl
+定理1-4-1 A v | f = refl
+
+_[_≔_] : 論理式 → 命題変数 → 論理式 → 論理式
+< x > [ p ≔ A ] with p == x
+... | t = A
+... | f = < x >
+_[_≔_] ⊤ p A         = ⊤
+_[_≔_] ⊥ p A         = ⊥
+_[_≔_] (C1 ∧ C2) p A = _[_≔_] C1 p A ∧ _[_≔_] C2 p A
+_[_≔_] (C1 ∨ C2) p A = _[_≔_] C1 p A ∨ _[_≔_] C2 p A
+_[_≔_] (C1 ⊃ C2) p A = _[_≔_] C1 p A ⊃ _[_≔_] C2 p A
+_[_≔_] (¬ C) p A     = ¬ _[_≔_] C p A
+
+lemma : (A B : 論理式) (v : 付値) → A ∼ B → v ⟦ A ⟧ ≈ v ⟦ B ⟧
+lemma A B v A∼B = sublemma (A∼B v)
+  where
+    sublemma : v ⟦ (A ⊃ B) ∧ (B ⊃ A) ⟧ ≈ t → v ⟦ A ⟧ ≈ v ⟦ B ⟧
+    sublemma x with v ⟦ A ⟧ | v ⟦ B ⟧
+    sublemma x | t | t = refl
+    sublemma x | t | f = sym x
+    sublemma x | f | t = x
+    sublemma x | f | f = refl
+
+--lemma2 : → v ⟦ A ≡ B ⟧ ≈ t
+
+-- 例1.7でもある。
+定理1-4-4 : (A B C : 論理式) (p : 命題変数) → A ∼ B → C [ p ≔ A ] ∼ C [ p ≔ B ]
+定理1-4-4 A B < q >   p A∼B v with p == q -- (1)
+... | t = A∼B v  -- Cがある命題変数qに等しいとき、がこれ。
+... | f = 定理1-4-1 < q > v -- qがpと異なるとき、がこれ。
+定理1-4-4 A B ⊤       p A∼B v = refl
+定理1-4-4 A B ⊥       p A∼B v = refl
+定理1-4-4 A B (D ∧ E) p A∼B v = lemma1 (定理1-4-4 A B D p A∼B) (定理1-4-4 A B E p A∼B)
+  where
+    lemma1 : D [ p ≔ A ] ∼ D [ p ≔ B ] 
+           → E [ p ≔ A ] ∼ E [ p ≔ B ] 
+           → v ⟦ (D ∧ E) [ p ≔ A ] ≡ (D ∧ E) [ p ≔ B ] ⟧ ≈ t
+    lemma1 Da∼Db Ea∼Eb = {!!}
+   {-
+    lemma1 Da∼Db Ea∼Eb with v ⟦ D [ p ≔ A ] ⟧ | v ⟦ D [ p ≔ B ] ⟧ | v ⟦ E [ p ≔ A ] ⟧ | v ⟦ E [ p ≔ B ] ⟧
+    lemma1 Da∼Db Ea∼Eb | t | t | d | e = {!!}
+    lemma1 Da∼Db Ea∼Eb | t | f | d | e = {!!}
+    lemma1 Da∼Db Ea∼Eb | f | c | d | e = {!!}
+   -}
+-- D [ p ≔ A ] ∼ D [ p ≔ B ] --> (v : 付値) → v ⟦ D [ p ≔ A ] ≡ D [ p ≔ B ] ⟧ ≈ t
+-- E [ p ≔ A ] ∼ E [ p ≔ B ]
+定理1-4-4 A B (D ∨ E) p A∼B v = {!!}
+定理1-4-4 A B (D ⊃ E) p A∼B v = {!!}
+定理1-4-4 A B (¬ D)   p A∼B v = {!!}
+
+-------------------------
+-- 1.5 標準形
+
+
+-------------------------
+-- 1.6 形式体系における証明
 
 module LK where
 -- P.23
