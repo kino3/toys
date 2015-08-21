@@ -73,12 +73,12 @@ open import Data.Empty
 p : Nat → Set
 p 2 = ⊤ --isTrue (prop n)
 p _ = ⊥
-
+{-
 ponyo : All p sample
 ponyo = {!!} :all: {!!} :all: tt :all: {!!} :all: {!!} :all: all[]
-
+-}
 findsample : Find prop sample
-findsample = found (3 ∷ 5 ∷ []) 2 {!!} (1 ∷ 4 ∷ [])
+findsample = found (3 ∷ 5 ∷ []) 2 tt (1 ∷ 4 ∷ [])
 
 sample2 : List Nat
 sample2 = 3 ∷ 5 ∷ 1 ∷ []
@@ -125,6 +125,8 @@ find p (x ∷ .(xs ++ y ∷ ys)) | it false prf | found xs y py ys
 find p (x ∷ xs)              | it false prf | not-found npxs     
   = not-found (falseIsFalse prf :all: npxs)
 
+
+
 -- Indexing into a list
 data _∈_ {A : Set}(x : A) : List A → Set where
   hd : ∀ {xs}   → x ∈ x ∷ xs
@@ -160,4 +162,44 @@ _!_ : {A : Set}(xs : List A)(n : Nat) → Lookup xs n
 (x ∷ xs) ! suc n with xs ! n
 (x ∷ xs) ! suc .(index p)       | inside y p = inside y (tl p)
 (x ∷ xs) ! suc .(length xs + m) | outside m  = outside m
+
+-- A type checker for λ-calculus
+infixr 30 _⇒_
+data Type : Set where
+  ı   : Type
+  _⇒_ : Type → Type → Type
+
+data Equal? : Type → Type → Set where
+  yes : ∀ {τ}   → Equal? τ τ
+  no  : ∀ {σ τ} → Equal? σ τ
+
+_=?=_ : (σ τ : Type) → Equal? σ τ
+ı       =?= ı       = yes
+ı       =?= (_ ⇒ _) = no
+(_ ⇒ _) =?= ı       = no
+σ₁ ⇒ τ₁ =?= σ₂ ⇒ τ₂ with σ₁ =?= σ₂ | τ₁ =?= τ₂
+σ₁ ⇒ τ₁ =?= .σ₁ ⇒ .τ₁ | yes | yes = yes
+σ₁ ⇒ τ₁ =?= σ₂ ⇒ τ₂   | _   | _   = no
+
+infixl 80 _$_
+data Raw : Set where
+  var : Nat → Raw
+  _$_ : Raw → Raw → Raw -- function application
+  lam : Type → Raw → Raw
+
+t1 : Type
+t1 = ı
+
+v1 : Raw
+v1 = var 3
+
+v2 : Raw
+v2 = lam t1 v1
+
+Cxt = List Type
+
+data Term (Γ : Cxt) : Type → Set where
+  var : ∀ {τ} → τ ∈ Γ → Term Γ τ
+  _$_ : ∀ {σ τ} → Term Γ (σ ⇒ τ) → Term Γ σ → Term Γ τ
+  lam : ∀ σ {τ} → Term (σ ∷ Γ) τ → Term Γ (σ ⇒ τ)
 

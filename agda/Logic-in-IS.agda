@@ -56,7 +56,8 @@ v ⟦ A ∨ B ⟧   = v ⟦ A ⟧ or  v ⟦ B ⟧
 v ⟦ A ⊃ B ⟧   = not (v ⟦ A ⟧) or v ⟦ B ⟧
 v ⟦ ¬ A ⟧     = not (v ⟦ A ⟧)
 
-open import Relation.Binary.PropositionalEquality renaming (_≡_ to _≈_) hiding ([_])
+open import Relation.Binary.PropositionalEquality as PropEq 
+  renaming (_≡_ to _≈_) hiding ([_])
 -- ≡はあとで定義したいのでrenameする。
 
 open import Data.Product renaming (_,_ to _&_)
@@ -130,9 +131,11 @@ A と B は P である = P A B
 論理的に同値 : 論理式 → 論理式 → Set
 論理的に同値 A B = 論理式 A ≡ B が トートロジー である
 
+論理的に同値' : 論理式 → 論理式 → Set
+論理的に同値' A B = ∀ v → v ⟦ A ⟧ ≈ v ⟦ B ⟧
 
 _∼_ : 論理式 → 論理式 → Set
-A ∼ B = A と B は 論理的に同値 である
+A ∼ B = A と B は 論理的に同値' である
 
 定理1-4-1 : (A : 論理式) → A ∼ A
 定理1-4-1 A v with v ⟦ A ⟧
@@ -143,13 +146,14 @@ _[_≔_] : 論理式 → 命題変数 → 論理式 → 論理式
 < x > [ p ≔ A ] with p == x
 ... | t = A
 ... | f = < x >
-_[_≔_] ⊤ p A         = ⊤
-_[_≔_] ⊥ p A         = ⊥
-_[_≔_] (C1 ∧ C2) p A = _[_≔_] C1 p A ∧ _[_≔_] C2 p A
-_[_≔_] (C1 ∨ C2) p A = _[_≔_] C1 p A ∨ _[_≔_] C2 p A
-_[_≔_] (C1 ⊃ C2) p A = _[_≔_] C1 p A ⊃ _[_≔_] C2 p A
-_[_≔_] (¬ C) p A     = ¬ _[_≔_] C p A
+⊤ [ p ≔ A ]         = ⊤
+⊥ [ p ≔ A ]         = ⊥
+(C1 ∧ C2) [ p ≔ A ] = C1 [ p ≔ A ] ∧ C2 [ p ≔ A ]
+(C1 ∨ C2) [ p ≔ A ] = C1 [ p ≔ A ] ∨ C2 [ p ≔ A ]
+(C1 ⊃ C2) [ p ≔ A ] = C1 [ p ≔ A ] ⊃ C2 [ p ≔ A ]
+(¬ C) [ p ≔ A ]     = ¬ (C [ p ≔ A ])
 
+{-
 lemma : (A B : 論理式) (v : 付値) → A ∼ B → v ⟦ A ⟧ ≈ v ⟦ B ⟧
 lemma A B v A∼B = sublemma (A∼B v)
   where
@@ -159,9 +163,10 @@ lemma A B v A∼B = sublemma (A∼B v)
     sublemma x | t | f = sym x
     sublemma x | f | t = x
     sublemma x | f | f = refl
-
+-}
 --lemma2 : → v ⟦ A ≡ B ⟧ ≈ t
 
+open ≡-Reasoning
 -- 例1.7でもある。
 定理1-4-4 : (A B C : 論理式) (p : 命題変数) → A ∼ B → C [ p ≔ A ] ∼ C [ p ≔ B ]
 定理1-4-4 A B < q >   p A∼B v with p == q -- (1)
@@ -169,18 +174,37 @@ lemma A B v A∼B = sublemma (A∼B v)
 ... | f = 定理1-4-1 < q > v -- qがpと異なるとき、がこれ。
 定理1-4-4 A B ⊤       p A∼B v = refl
 定理1-4-4 A B ⊥       p A∼B v = refl
-定理1-4-4 A B (D ∧ E) p A∼B v = lemma1 (定理1-4-4 A B D p A∼B) (定理1-4-4 A B E p A∼B)
+定理1-4-4 A B (D ∧ E) p A∼B v = ? --lemma1 (定理1-4-4 A B D p A∼B) (定理1-4-4 A B E p A∼B)
   where
     lemma1 : D [ p ≔ A ] ∼ D [ p ≔ B ] 
            → E [ p ≔ A ] ∼ E [ p ≔ B ] 
            → v ⟦ (D ∧ E) [ p ≔ A ] ≡ (D ∧ E) [ p ≔ B ] ⟧ ≈ t
-    lemma1 Da∼Db Ea∼Eb = {!!}
-   {-
-    lemma1 Da∼Db Ea∼Eb with v ⟦ D [ p ≔ A ] ⟧ | v ⟦ D [ p ≔ B ] ⟧ | v ⟦ E [ p ≔ A ] ⟧ | v ⟦ E [ p ≔ B ] ⟧
-    lemma1 Da∼Db Ea∼Eb | t | t | d | e = {!!}
-    lemma1 Da∼Db Ea∼Eb | t | f | d | e = {!!}
-    lemma1 Da∼Db Ea∼Eb | f | c | d | e = {!!}
-   -}
+    lemma1 Da∼Db Ea∼Eb = {!!} 
+{-
+      begin 
+        v ⟦ (D ∧ E) [ p ≔ A ] ≡ (D ∧ E) [ p ≔ B ] ⟧
+      ≡⟨ {!!} ⟩ 
+        {!(v ⟦ (D ∧ E) [ p ≔ A ] ⟧ ⊃ v ⟦ (D ∧ E) [ p ≔ B ] ⟧) ∧ (v ⟦ (D ∧ E) [ p ≔ B ] ⟧ ⊃ v ⟦ (D ∧ E) [ p ≔ A ] ⟧)!} 
+      ≡⟨ {!!} ⟩
+        {!!} 
+      ≡⟨ {!!} ⟩
+        t
+      ∎
+-}
+{-
+ Da∼Db
+ v ⟦ D [ p ≔ A ] ≡ D [ p ≔ B ] ⟧ ≈ t
+
+   v ⟦ (D ∧ E) [ p ≔ A ] ⟧ ≈ t
+ → v ⟦ D [ p ≔ A ] ∧ E [ p ≔ A ] ⟧ ≈ t
+ → v ⟦ D [ p ≔ A ] ⟧ and v ⟦ E [ p ≔ A ] ⟧ ≈ t
+ → v ⟦ D [ p ≔ B ] ⟧ and v ⟦ E [ p ≔ B ] ⟧ ≈ t by I.H.
+ → v ⟦ D [ p ≔ B ] ∧ E [ p ≔ B ] ⟧ ≈ t
+ → v ⟦ (D ∧ E) [ p ≔ B ] ⟧ ≈ t
+ → 
+-}    
+
+
 -- D [ p ≔ A ] ∼ D [ p ≔ B ] --> (v : 付値) → v ⟦ D [ p ≔ A ] ≡ D [ p ≔ B ] ⟧ ≈ t
 -- E [ p ≔ A ] ∼ E [ p ≔ B ]
 定理1-4-4 A B (D ∨ E) p A∼B v = {!!}
