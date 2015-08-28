@@ -196,6 +196,9 @@ v1 = var 3
 v2 : Raw
 v2 = lam t1 v1
 
+v3 : Raw
+v3 = lam (ı ⇒ ı) {!!} $ var 3
+
 Cxt = List Type
 
 data Term (Γ : Cxt) : Type → Set where
@@ -203,3 +206,29 @@ data Term (Γ : Cxt) : Type → Set where
   _$_ : ∀ {σ τ} → Term Γ (σ ⇒ τ) → Term Γ σ → Term Γ τ
   lam : ∀ σ {τ} → Term (σ ∷ Γ) τ → Term Γ (σ ⇒ τ)
 
+erase : ∀ {Γ τ} → Term Γ τ → Raw
+erase (var x)   = var (index x)
+erase (t $ u)   = erase t $ erase u
+erase (lam σ t) = lam σ (erase t)
+
+data Infer (Γ : Cxt) : Raw → Set where
+  ok  : (τ : Type)(t : Term Γ τ) → Infer Γ (erase t)
+  bad : {e : Raw} → Infer Γ e
+
+infer : (Γ : Cxt)(e : Raw) → Infer Γ e
+ -- var
+infer Γ (var n) with Γ ! n
+infer Γ (var .(index i))      | inside σ i = ok σ (var i)
+infer Γ (var .(length Γ + n)) | outside n  = bad
+ -- apply
+infer Γ (e1 $ e2) with infer Γ e1 | infer Γ e2
+infer Γ (e1 $ e2)         | bad          | _   = bad
+infer Γ (.(erase t) $ e2) | ok ı t       | _   = bad
+infer Γ (.(erase t) $ e2) | ok (σ ⇒ τ) t | bad = bad
+infer Γ (.(erase t1) $ .(erase t2)) | ok (σ ⇒ τ) t1 | ok σ' t2 with σ =?= σ'
+infer Γ (.(erase t1) $ .(erase t2)) | ok (σ ⇒ τ) t1 | ok σ' t2 | no  = bad
+infer Γ (.(erase t1) $ .(erase t2)) | ok (σ ⇒ τ) t1 | ok .σ t2 | yes = ok τ (t1 $ t2)
+ -- lambda
+infer Γ (lam σ e) with infer (σ ∷ Γ) e
+infer Γ (lam σ .(erase t)) | ok τ t = ok (σ ⇒ τ) (lam σ t)
+infer Γ (lam σ e)          | bad    = bad
