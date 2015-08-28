@@ -174,7 +174,7 @@ open ≡-Reasoning
 ... | f = 定理1-4-1 < q > v -- qがpと異なるとき、がこれ。
 定理1-4-4 A B ⊤       p A∼B v = refl
 定理1-4-4 A B ⊥       p A∼B v = refl
-定理1-4-4 A B (D ∧ E) p A∼B v = ? --lemma1 (定理1-4-4 A B D p A∼B) (定理1-4-4 A B E p A∼B)
+定理1-4-4 A B (D ∧ E) p A∼B v = {!!} --lemma1 (定理1-4-4 A B D p A∼B) (定理1-4-4 A B E p A∼B)
   where
     lemma1 : D [ p ≔ A ] ∼ D [ p ≔ B ] 
            → E [ p ≔ A ] ∼ E [ p ≔ B ] 

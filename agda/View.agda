@@ -201,6 +201,9 @@ v3 = lam (ı ⇒ ı) {!!} $ var 3
 
 Cxt = List Type
 
+succ : Raw
+succ = lam {!!} (lam {!!} (lam {!!} (var 1 $ (var 2 $ var 1 $ var 0))))
+
 data Term (Γ : Cxt) : Type → Set where
   var : ∀ {τ} → τ ∈ Γ → Term Γ τ
   _$_ : ∀ {σ τ} → Term Γ (σ ⇒ τ) → Term Γ σ → Term Γ τ
