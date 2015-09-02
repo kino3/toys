@@ -1,4 +1,8 @@
 module Workshop201509 where
+{-
+ Kinoshita-lab Gasshuku 2015.08.31-2015.09.02
+  @ KU Fujimi Seminar House
+-}
 
 {-
 sum :: Num a => [ a ] -> a
@@ -55,8 +59,6 @@ init2 xs = take (length xs - 1) xs
 ('a','b','c') :: (Char, Char, Char)
 *Workshop201509> :t [(False, '0'),(True,'1')]
 [(False, '0'),(True,'1')] :: [(Bool, Char)]
-*Workshop201509> ([False,True],['0','1'])
-([False,True],"01")
 *Workshop201509> :t ([False,True],['0','1'])
 ([False,True],['0','1']) :: ([Bool], [Char])
 *Workshop201509> :t [tail,init,reverse]
@@ -101,9 +103,47 @@ safetail3 [] = []
 safetail3 (x : xs) = tail (x : xs)
 
 -- 4.8.3
-(||) :: Bool -> Bool -> Bool
-False || False = False
-_     || _     = True
+{-
+(\/) :: Bool -> Bool -> Bool
+False \/ False = False
+_     \/ _     = True
+-}
+{-
+(\/) :: Bool -> Bool -> Bool
+True  \/ True  = True
+True  \/ False = True
+False \/ True  = True
+False \/ False = False
+-}
+{-
+(\/) :: Bool -> Bool -> Bool
+True  \/ _  = True
+False \/ b  = b
+-}
+(\/) :: Bool -> Bool -> Bool
+b \/ c | b == c    = b
+       | otherwise = True
+
+-- 4.8.4
+{-
+(/\) :: Bool -> Bool -> Bool
+b /\ c = if b == True 
+           then if c == True
+                  then True
+                  else False
+           else False
+-}
+-- 4.8.5
+(/\) :: Bool -> Bool -> Bool
+b /\ c = if b == True 
+           then c
+           else False
+
+-- 4.8.6
+mult :: Num a => a -> a -> a -> a
+mult = \ x y z -> x * y * z
+
+-- 
 
 -- 5.7.5
 ex575before = [(x,y) | x <- [1,2,3], y <- [4,5,6]]
