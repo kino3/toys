@@ -135,7 +135,7 @@ A と B は P である = P A B
 論理的に同値' A B = ∀ v → v ⟦ A ⟧ ≈ v ⟦ B ⟧
 
 _∼_ : 論理式 → 論理式 → Set
-A ∼ B = A と B は 論理的に同値' である
+A ∼ B = A と B は 論理的に同値 である
 
 定理1-4-1 : (A : 論理式) → A ∼ A
 定理1-4-1 A v with v ⟦ A ⟧
@@ -153,18 +153,23 @@ _[_≔_] : 論理式 → 命題変数 → 論理式 → 論理式
 (C1 ⊃ C2) [ p ≔ A ] = C1 [ p ≔ A ] ⊃ C2 [ p ≔ A ]
 (¬ C) [ p ≔ A ]     = ¬ (C [ p ≔ A ])
 
-{-
-lemma : (A B : 論理式) (v : 付値) → A ∼ B → v ⟦ A ⟧ ≈ v ⟦ B ⟧
-lemma A B v A∼B = sublemma (A∼B v)
-  where
-    sublemma : v ⟦ (A ⊃ B) ∧ (B ⊃ A) ⟧ ≈ t → v ⟦ A ⟧ ≈ v ⟦ B ⟧
-    sublemma x with v ⟦ A ⟧ | v ⟦ B ⟧
-    sublemma x | t | t = refl
-    sublemma x | t | f = sym x
-    sublemma x | f | t = x
-    sublemma x | f | f = refl
--}
---lemma2 : → v ⟦ A ≡ B ⟧ ≈ t
+lemma : (A B : 論理式) (v : 付値) → v ⟦ A ⟧ ≈ v ⟦ B ⟧ → v ⟦ A ≡ B ⟧ ≈ t
+lemma A B v with v ⟦ A ⟧ 
+lemma A B v | t with v ⟦ B ⟧
+lemma A B v | t | t = λ _ → refl
+lemma A B v | t | f = λ ()
+lemma A B v | f with v ⟦ B ⟧
+lemma A B v | f | t = λ ()
+lemma A B v | f | f = λ _ → refl
+
+lemma' : (A B : 論理式) (v : 付値) → v ⟦ A ≡ B ⟧ ≈ t → v ⟦ A ⟧ ≈ v ⟦ B ⟧ 
+lemma' A B v prf with v ⟦ A ⟧
+lemma' A B v prf | t with v ⟦ B ⟧
+lemma' A B v prf | t | t = refl
+lemma' A B v prf | t | f = sym prf
+lemma' A B v prf | f with v ⟦ B ⟧
+lemma' A B v prf | f | t = prf
+lemma' A B v prf | f | f = refl
 
 open ≡-Reasoning
 -- 例1.7でもある。
@@ -174,12 +179,12 @@ open ≡-Reasoning
 ... | f = 定理1-4-1 < q > v -- qがpと異なるとき、がこれ。
 定理1-4-4 A B ⊤       p A∼B v = refl
 定理1-4-4 A B ⊥       p A∼B v = refl
-定理1-4-4 A B (D ∧ E) p A∼B v = {!!} --lemma1 (定理1-4-4 A B D p A∼B) (定理1-4-4 A B E p A∼B)
+定理1-4-4 A B (D ∧ E) p A∼B v = lemma1 (定理1-4-4 A B D p A∼B) (定理1-4-4 A B E p A∼B)
   where
     lemma1 : D [ p ≔ A ] ∼ D [ p ≔ B ] 
            → E [ p ≔ A ] ∼ E [ p ≔ B ] 
            → v ⟦ (D ∧ E) [ p ≔ A ] ≡ (D ∧ E) [ p ≔ B ] ⟧ ≈ t
-    lemma1 Da∼Db Ea∼Eb = {!!} 
+    lemma1 Da∼Db Ea∼Eb = lemma ((D ∧ E) [ p ≔ A ]) ((D ∧ E) [ p ≔ B ]) v {!!}
 {-
       begin 
         v ⟦ (D ∧ E) [ p ≔ A ] ≡ (D ∧ E) [ p ≔ B ] ⟧

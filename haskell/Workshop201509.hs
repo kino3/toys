@@ -143,8 +143,6 @@ b /\ c = if b == True
 mult :: Num a => a -> a -> a -> a
 mult = \ x y z -> x * y * z
 
--- 
-
 -- 5.7.5
 ex575before = [(x,y) | x <- [1,2,3], y <- [4,5,6]]
 ex575after  = concat [ [ (x,y) | y <- [4,5,6]] | x <- [1,2,3] ]
