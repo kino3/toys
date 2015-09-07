@@ -185,6 +185,7 @@ open ≡-Reasoning
            → E [ p ≔ A ] ∼ E [ p ≔ B ] 
            → v ⟦ (D ∧ E) [ p ≔ A ] ≡ (D ∧ E) [ p ≔ B ] ⟧ ≈ t
     lemma1 Da∼Db Ea∼Eb = lemma ((D ∧ E) [ p ≔ A ]) ((D ∧ E) [ p ≔ B ]) v {!!}
+
 {-
       begin 
         v ⟦ (D ∧ E) [ p ≔ A ] ≡ (D ∧ E) [ p ≔ B ] ⟧
@@ -219,6 +220,24 @@ open ≡-Reasoning
 -------------------------
 -- 1.5 標準形
 
+postulate 
+  nf : 論理式 → 論理式
+
+_=!=_ : 論理式 → 論理式 → Bool
+< x > =!= < y > = x == y
+< x > =!= _ = f
+⊤ =!= y = {!!}
+⊥ =!= y = {!!}
+(x ∧ x₁) =!= y = {!!}
+(x ∨ x₁) =!= y = {!!}
+(x ⊃ x₁) =!= y = {!!}
+¬ x =!= y = {!!}
+
+exam3-1 : (P : 論理式) → P ∼ nf(P)
+exam3-1 p = {!!}
+
+exam3-2 : {P Q : 論理式} → P ∼ Q → T (nf(P) =!= nf(Q))
+exam3-2 prf = {!!}
 
 -------------------------
 -- 1.6 形式体系における証明

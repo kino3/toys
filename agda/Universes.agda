@@ -94,9 +94,10 @@ f = |K| ℕ
 hoge : μ f
 hoge = < zero >
 
--- fold : (F : Functor){A : Set} → ([ F ] A → A) → μ F → A
--- fold F φ < x > = φ (map F (fold F φ) x)
-
+{-
+fold' : (F : Functor){A : Set} → ([ F ] A → A) → μ F → A
+fold' F φ < x > = φ (map F (fold' F φ) x)
+-}
 mapFold : ∀ {X} F G → ([ G ] X → X) → [ F ] (μ G) → [ F ] X
 mapFold |Id|        G φ < x >   = φ (mapFold G G φ x)
 mapFold (|K| A)     G φ c       = c
