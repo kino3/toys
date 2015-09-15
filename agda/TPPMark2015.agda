@@ -48,11 +48,11 @@ deMorgan < x >       = < x >
 deMorgan (A ∧ B)     = deMorgan A ∧ deMorgan B
 deMorgan (A ∨ B)     = deMorgan A ∨ deMorgan B
 deMorgan (A ⊃ B)     = deMorgan A ⊃ deMorgan B
-deMorgan (¬ < x >)   = ¬ < x >
+deMorgan (¬ < x >)   = ¬ deMorgan < x >
 deMorgan (¬ (A ∧ B)) = deMorgan (¬ A) ∨ deMorgan (¬ B) 
 deMorgan (¬ (A ∨ B)) = deMorgan (¬ A) ∧ deMorgan (¬ B)
-deMorgan (¬ (A ⊃ B)) = ¬ deMorgan A ⊃ deMorgan B
-deMorgan (¬ ¬ A)     = ¬ ¬ deMorgan A
+deMorgan (¬ (A ⊃ B)) = ¬ deMorgan (A ⊃ B)
+deMorgan (¬ ¬ A)     = ¬ deMorgan (¬ A)
 
 dne : 論理式 → 論理式
 dne < x >   = < x >
@@ -67,8 +67,8 @@ dne (¬ (¬ A))   = dne A
 
 dist : 論理式 → 論理式
 dist < x > = < x >
-dist (A ∧ (B ∨ C)) = dist A ∧ dist B ∨ dist A ∧ dist C
-dist ((A ∨ B) ∧ C) = dist A ∧ dist C ∨ dist B ∧ dist C
+dist (A ∧ (B ∨ C)) = dist (A ∧ B) ∨ dist (A ∧ C)
+dist ((A ∨ B) ∧ C) = dist (A ∧ C) ∨ dist (B ∧ C)
 dist (A ∧ B) = dist A ∧ dist B
 dist (A ∨ B) = dist A ∨ dist B
 dist (A ⊃ B) = dist A ⊃ dist B
@@ -92,8 +92,54 @@ _=!=_ : 論理式 → 論理式 → Bool
 ¬ x =!= ¬ y = x =!= y
 ¬ x =!= _ = f
 
+lemma1 : (P : 論理式) → P と ⊃-elim(P) は 同値 である
+lemma1 < x > v = refl
+lemma1 (A ∧ B) v rewrite lemma1 A v | lemma1 B v = refl
+lemma1 (A ∨ B) v rewrite lemma1 A v | lemma1 B v = refl
+lemma1 (A ⊃ B) v rewrite lemma1 A v | lemma1 B v = refl
+lemma1 (¬ A) v   rewrite lemma1 A v = refl
+
+lemma2 : (P : 論理式) → P と deMorgan(P) は 同値 である
+lemma2 < x > v = refl
+lemma2 (A ∧ B) v rewrite lemma2 A v | lemma2 B v = refl
+lemma2 (A ∨ B) v rewrite lemma2 A v | lemma2 B v = refl
+lemma2 (A ⊃ B) v rewrite lemma2 A v | lemma2 B v = refl
+lemma2 (¬ < x >)   v = refl
+lemma2 (¬ (A ∧ B)) v rewrite lemma2 A v | lemma2 B v = {!!}
+lemma2 (¬ (A ∨ B)) v rewrite lemma2 A v | lemma2 B v = {!!}
+lemma2 (¬ (A ⊃ B)) v rewrite lemma2 A v | lemma2 B v = refl
+lemma2 (¬ (¬ A))   v rewrite lemma2 A v = {!!}
+
+lemma3 : (P : 論理式) → P と dne(P) は 同値 である
+lemma3 < x > v   = refl
+lemma3 (A ∧ B) v rewrite lemma3 A v | lemma3 B v = refl
+lemma3 (A ∨ B) v rewrite lemma3 A v | lemma3 B v = refl
+lemma3 (A ⊃ B) v rewrite lemma3 A v | lemma3 B v = refl
+lemma3 (¬ < x >) v   = refl
+lemma3 (¬ (A ∧ B)) v rewrite lemma3 A v | lemma3 B v = refl
+lemma3 (¬ (A ∨ B)) v rewrite lemma3 A v | lemma3 B v = refl
+lemma3 (¬ (A ⊃ B)) v rewrite lemma3 A v | lemma3 B v = refl
+lemma3 (¬ (¬ A)) v   rewrite lemma3 A v with v ⟦ dne A ⟧
+... | t = refl
+... | f = refl
+
+lemma4 : (P : 論理式) → P と dist(P) は 同値 である
+lemma4 < x >   v = refl
+lemma4 (A ∧ (B ∨ C)) v rewrite lemma4 A v | lemma4 B v | lemma4 C v = {!!}
+lemma4 ((A ∨ B) ∧ C) v = {!!}
+lemma4 (A ∧ B) v rewrite lemma4 A v | lemma4 B v
+  with v ⟦ dist A ⟧ | v ⟦ dist B ⟧ | v ⟦ dist (A ∧ B) ⟧
+... | b | c | d = {!!}
+lemma4 (A ∨ B) v rewrite lemma4 A v | lemma4 B v = refl
+lemma4 (A ⊃ B) v rewrite lemma4 A v | lemma4 B v = refl
+lemma4 (¬ A)   v rewrite lemma4 A v = refl
+
 exam3-1 : (P : 論理式) → P と nf(P) は 同値 である
-exam3-1 P = {!!}
+exam3-1 P v 
+  rewrite lemma1 P v | 
+          lemma2 (⊃-elim P) v | 
+          lemma3 (deMorgan (⊃-elim P)) v | 
+          lemma4 (dne (deMorgan (⊃-elim P))) v = refl
 
 exam3-2 : (P Q : 論理式) → P と Q は 同値 である → T (nf(P) =!= nf(Q))
 exam3-2 P Q prf = {!!}
