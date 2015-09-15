@@ -240,7 +240,13 @@ _=!=_ : 論理式 → 論理式 → Bool
 ¬ x =!= _ = f
 
 exam3-1 : (P : 論理式) → P ∼ nf(P)
-exam3-1 p = {!!}
+exam3-1 < x > v = {!!}
+exam3-1 ⊤ v = {!!}
+exam3-1 ⊥ v = {!!}
+exam3-1 (p ∧ p₁) v = {!!}
+exam3-1 (p ∨ p₁) v = {!!}
+exam3-1 (p ⊃ p₁) v = {!!}
+exam3-1 (¬ p) v = {!!}
 
 exam3-2 : {P Q : 論理式} → P ∼ Q → T (nf(P) =!= nf(Q))
 exam3-2 prf = {!!}

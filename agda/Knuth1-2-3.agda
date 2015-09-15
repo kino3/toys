@@ -39,3 +39,14 @@ sample = 30 ∷ 20 ∷ 10 ∷ 40 ∷ 50 ∷ []
 x : ℕ
 x = Σ cond1 sample
 
+
+open import Data.Fin
+func2list : {n : ℕ} → (Fin n → ℕ) → List (ℕ × ℕ)
+func2list {zero} f  = {!!}
+func2list {suc n} f = {!!}
+
+Σ2 : {n : ℕ} → (Fin n → Bool) → (Fin n → ℕ) → ℕ
+Σ2 cond f = {!!}
+
+Σ3 : (ℕ → Bool) → (ℕ → ℕ) → ℕ
+Σ3 cond f = foldl {!!} 0 {!!}

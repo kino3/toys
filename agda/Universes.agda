@@ -41,13 +41,13 @@ notNotId' true = refl
 notNotId' false = refl
 -}
 
-open import Data.Nat using (ℕ;zero;suc)
-nonZero : ℕ → Bool
+open import Data.Nat using (zero;suc;_+_) renaming (ℕ to Nat)
+nonZero : Nat → Bool
 nonZero zero = false
 nonZero (suc _) = true
 
 postulate
-  _div_ : ℕ → (m : ℕ){p : isTrue (nonZero m)} → ℕ
+  _div_ : Nat → (m : Nat){p : isTrue (nonZero m)} → Nat
 
 --three : Nat
 three = 16 div 5
@@ -89,7 +89,7 @@ data μ_ (F : Functor) : Set where
   <_> : [ F ] (μ F) → μ F
 
 f : Functor
-f = |K| ℕ
+f = |K| Nat
 
 hoge : μ f
 hoge = < zero >
@@ -150,4 +150,47 @@ foldr {A}{B} f z = fold [ const z || uncurry f ]
 
 plus : NAT → NAT → NAT
 plus n m = fold [ const m || S ] n
+
+-- Universes for overloading
+
+open import Data.List using (List;[];_∷_)
+
+data Type : Set where
+  bool : Type
+  nat  : Type
+  list : Type → Type
+  pair : Type → Type → Type
+
+El : Type → Set
+El bool       = Bool
+El nat        = Nat
+El (list a)   = List (El a)
+El (pair a b) = El a × El b
+
+infix 30 _==_
+_==_ : {a : Type} → El a → El a → Bool
+
+_==_ {bool} true y  = y
+_==_ {bool} false y = not y
+
+_==_ {nat}  zero    zero   = true
+_==_ {nat}  zero   (suc y) = false
+_==_ {nat} (suc x)  zero   = false
+_==_ {nat} (suc x) (suc y) = x == y
+
+_==_ {list a} []       []       = true
+_==_ {list a} []       (x ∷ xs) = false
+_==_ {list a} (x ∷ xs) []       = false
+_==_ {list a} (x ∷ xs) (y ∷ ys) = x == y and xs == ys 
+
+_==_ {pair a b} (x₁ , y₁) (x₂ , y₂) = x₁ == x₂ and y₁ == y₂
+
+example₁ : isTrue ((2 + 2) == 4)
+example₁ = _
+
+example₂ : isTrue (not ((true ∷ false ∷ []) == (true ∷ true ∷ [])))
+example₂ = record {}
+
+module Exercises where
+
 
