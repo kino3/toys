@@ -49,8 +49,8 @@ deMorgan (A ∧ B)     = deMorgan A ∧ deMorgan B
 deMorgan (A ∨ B)     = deMorgan A ∨ deMorgan B
 deMorgan (A ⊃ B)     = deMorgan A ⊃ deMorgan B
 deMorgan (¬ < x >)   = ¬ deMorgan < x >
-deMorgan (¬ (A ∧ B)) = deMorgan (¬ A) ∨ deMorgan (¬ B) 
-deMorgan (¬ (A ∨ B)) = deMorgan (¬ A) ∧ deMorgan (¬ B)
+deMorgan (¬ (A ∧ B)) = ¬ deMorgan A ∨ ¬ deMorgan B 
+deMorgan (¬ (A ∨ B)) = ¬ deMorgan A ∧ ¬ deMorgan B
 deMorgan (¬ (A ⊃ B)) = ¬ deMorgan (A ⊃ B)
 deMorgan (¬ ¬ A)     = ¬ deMorgan (¬ A)
 
@@ -105,10 +105,20 @@ lemma2 (A ∧ B) v rewrite lemma2 A v | lemma2 B v = refl
 lemma2 (A ∨ B) v rewrite lemma2 A v | lemma2 B v = refl
 lemma2 (A ⊃ B) v rewrite lemma2 A v | lemma2 B v = refl
 lemma2 (¬ < x >)   v = refl
-lemma2 (¬ (A ∧ B)) v rewrite lemma2 A v | lemma2 B v = {!!}
-lemma2 (¬ (A ∨ B)) v rewrite lemma2 A v | lemma2 B v = {!!}
+lemma2 (¬ (A ∧ B)) v rewrite lemma2 A v | lemma2 B v 
+  with v ⟦ deMorgan A ⟧ | v ⟦ deMorgan B ⟧
+... | t | t = refl
+... | t | f = refl
+... | f | t = refl
+... | f | f = refl
+lemma2 (¬ (A ∨ B)) v rewrite lemma2 A v | lemma2 B v
+  with v ⟦ deMorgan A ⟧ | v ⟦ deMorgan B ⟧
+... | t | t = refl
+... | t | f = refl
+... | f | t = refl
+... | f | f = refl
 lemma2 (¬ (A ⊃ B)) v rewrite lemma2 A v | lemma2 B v = refl
-lemma2 (¬ (¬ A))   v rewrite lemma2 A v = {!!}
+lemma2 (¬ (¬ A))   v rewrite lemma2 (¬ A) v = refl
 
 lemma3 : (P : 論理式) → P と dne(P) は 同値 である
 lemma3 < x > v   = refl
@@ -125,11 +135,9 @@ lemma3 (¬ (¬ A)) v   rewrite lemma3 A v with v ⟦ dne A ⟧
 
 lemma4 : (P : 論理式) → P と dist(P) は 同値 である
 lemma4 < x >   v = refl
-lemma4 (A ∧ (B ∨ C)) v rewrite lemma4 A v | lemma4 B v | lemma4 C v = {!!}
+lemma4 (A ∧ (B ∨ C)) v rewrite lemma4 A v = ?
 lemma4 ((A ∨ B) ∧ C) v = {!!}
-lemma4 (A ∧ B) v rewrite lemma4 A v | lemma4 B v
-  with v ⟦ dist A ⟧ | v ⟦ dist B ⟧ | v ⟦ dist (A ∧ B) ⟧
-... | b | c | d = {!!}
+lemma4 (A ∧ B) v = {!!}
 lemma4 (A ∨ B) v rewrite lemma4 A v | lemma4 B v = refl
 lemma4 (A ⊃ B) v rewrite lemma4 A v | lemma4 B v = refl
 lemma4 (¬ A)   v rewrite lemma4 A v = refl
