@@ -49,8 +49,8 @@ deMorgan (A ∧ B)     = deMorgan A ∧ deMorgan B
 deMorgan (A ∨ B)     = deMorgan A ∨ deMorgan B
 deMorgan (A ⊃ B)     = deMorgan A ⊃ deMorgan B
 deMorgan (¬ < x >)   = ¬ deMorgan < x >
-deMorgan (¬ (A ∧ B)) = ¬ deMorgan A ∨ ¬ deMorgan B 
-deMorgan (¬ (A ∨ B)) = ¬ deMorgan A ∧ ¬ deMorgan B
+deMorgan (¬ (A ∧ B)) = deMorgan (¬ A) ∨ deMorgan (¬ B) 
+deMorgan (¬ (A ∨ B)) = deMorgan (¬ A) ∧ deMorgan (¬ B)
 deMorgan (¬ (A ⊃ B)) = ¬ deMorgan (A ⊃ B)
 deMorgan (¬ ¬ A)     = ¬ deMorgan (¬ A)
 
@@ -78,7 +78,7 @@ nf : 論理式 → 論理式
 nf A = dist (dne (deMorgan (⊃-elim A)))
 
 t1 : 論理式
-t1 = ¬ (< 'x' > ⊃ (< 'y' > ∧ < 'z' >))
+t1 = ¬ (< 'x' > ⊃ (< 'y' > ∧ < 'z' > ∨ < 'z' > ∧ ¬ < 'x' >))
 
 _=!=_ : 論理式 → 論理式 → Bool
 < x > =!= < y > = x == y
@@ -107,16 +107,16 @@ lemma2 (A ⊃ B) v rewrite lemma2 A v | lemma2 B v = refl
 lemma2 (¬ < x >)   v = refl
 lemma2 (¬ (A ∧ B)) v rewrite lemma2 A v | lemma2 B v 
   with v ⟦ deMorgan A ⟧ | v ⟦ deMorgan B ⟧
-... | t | t = refl
-... | t | f = refl
-... | f | t = refl
-... | f | f = refl
+... | t | t = {!!}
+... | t | f = {!!}
+... | f | t = {!!}
+... | f | f = {!!}
 lemma2 (¬ (A ∨ B)) v rewrite lemma2 A v | lemma2 B v
   with v ⟦ deMorgan A ⟧ | v ⟦ deMorgan B ⟧
-... | t | t = refl
-... | t | f = refl
-... | f | t = refl
-... | f | f = refl
+... | t | t = {!!}
+... | t | f = {!!}
+... | f | t = {!!}
+... | f | f = {!!}
 lemma2 (¬ (A ⊃ B)) v rewrite lemma2 A v | lemma2 B v = refl
 lemma2 (¬ (¬ A))   v rewrite lemma2 (¬ A) v = refl
 
@@ -135,7 +135,7 @@ lemma3 (¬ (¬ A)) v   rewrite lemma3 A v with v ⟦ dne A ⟧
 
 lemma4 : (P : 論理式) → P と dist(P) は 同値 である
 lemma4 < x >   v = refl
-lemma4 (A ∧ (B ∨ C)) v rewrite lemma4 A v = ?
+lemma4 (A ∧ (B ∨ C)) v rewrite lemma4 A v | lemma4 B v | lemma4 C v = {!!}
 lemma4 ((A ∨ B) ∧ C) v = {!!}
 lemma4 (A ∧ B) v = {!!}
 lemma4 (A ∨ B) v rewrite lemma4 A v | lemma4 B v = refl
