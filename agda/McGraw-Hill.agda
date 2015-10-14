@@ -3,7 +3,7 @@ module McGraw-Hill where
 open import Relation.Unary
 open import Level
 open import Data.Empty
-open import Data.Unit
+open import Data.Unit hiding (_≤_)
 
 data Pref : Set where
   Nara Kanagawa : Pref
@@ -26,9 +26,9 @@ proof4 : {a : Set} {l : Level} (A : Pred a l) → A ⊆ A
 proof4 B = λ x → x
 
 module Chapter2 (s : Set) (l : Level) (A B C : Pred s l) where
-  open import Relation.Binary.PropositionalEquality --using (_≡_)
-  open import Relation.Binary
-  open import Data.Product
+  open import Relation.Binary.PropositionalEquality  --using (_≡_)
+  open import Relation.Binary 
+  open import Data.Product 
 
   Example2-7a1 : A ⊆ A
   Example2-7a1 = λ x∈A → x∈A
@@ -41,4 +41,15 @@ module Chapter2 (s : Set) (l : Level) (A B C : Pred s l) where
 
   Example2-7a3' : Antisymmetric {A = Pred s l} _⊆_ _≡_
   Example2-7a3' = {!!}
+  
+  open import Data.Nat
+  Example2-11b' : IsPartialOrder _≡_ _≤_
+  Example2-11b' = 
+    record { 
+      isPreorder = record { isEquivalence = {!!} ; reflexive = {!!} ; trans = {!!} } ; 
+      antisym = antisym-≤ }
+    where
+      antisym-≤ : ∀ {x} {y} → x ≤ y → y ≤ x → x ≡ y
+      antisym-≤ z≤n z≤n = refl
+      antisym-≤ (s≤s p) (s≤s q) rewrite antisym-≤ p q = refl
 

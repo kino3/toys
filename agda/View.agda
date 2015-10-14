@@ -235,3 +235,9 @@ infer Γ (.(erase t1) $ .(erase t2)) | ok (σ ⇒ τ) t1 | ok .σ t2 | yes = ok 
 infer Γ (lam σ e) with infer (σ ∷ Γ) e
 infer Γ (lam σ .(erase t)) | ok τ t = ok (σ ⇒ τ) (lam σ t)
 infer Γ (lam σ e)          | bad    = bad
+
+
+module Exercise3-2 where
+  data Infer : Set where
+-}
+
