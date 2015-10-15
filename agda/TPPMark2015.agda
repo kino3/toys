@@ -5,15 +5,16 @@ open import Data.Bool
   renaming (true to t; false to f;_∧_ to _and_;_∨_ to _or_)
 open import Relation.Binary.PropositionalEquality as PropEq 
 open import Data.Product
+open import Data.Nat
 
 命題変数 = Char
 
 data 論理式 : Set where
   <_> : 命題変数 → 論理式
   _∧_ : 論理式 → 論理式 → 論理式 
-  _∨_ : 論理式 → 論理式 → 論理式
-  _⊃_ : 論理式 → 論理式 → 論理式
-  ¬_  : 論理式 → 論理式
+  _∨_ : 論理式 → 論理式 → 論理式 
+  _⊃_ : 論理式 → 論理式 → 論理式 
+  ¬_  : 論理式 → 論理式 
 infix 100 ¬_
 infixl 70 _∧_
 infixl 50 _∨_
@@ -65,10 +66,29 @@ dne (¬ (A ∨ B)) = ¬ (dne A ∨ dne B)
 dne (¬ (A ⊃ B)) = ¬ (dne A ⊃ dne B)
 dne (¬ (¬ A))   = dne A
 
+sort : 論理式 → 論理式
+sort < x >   = < x >
+sort (A ∧ B) with A | B
+
+sort (A ∧ B) | < x >   | _ = A ∧ sort B
+
+sort (A ∧ B) | A1 ∧ A2 | < x >   = B ∧ sort A
+sort (A ∧ B) | A1 ∧ A2 | B1 ∧ B2 = {!!}
+sort (A ∧ B) | A1 ∧ A2 | B1 ∨ B2 = {!!}
+sort (A ∧ B) | A1 ∧ A2 | B1 ⊃ B2 = {!!}
+sort (A ∧ B) | A1 ∧ A2 | ¬ B1    = B ∧ sort A
+
+sort (A ∧ B) | x1 ∨ x2 | y = {!!}
+sort (A ∧ B) | x1 ⊃ x2 | y = A ∧ sort B
+sort (A ∧ B) | ¬ x     | _ = A ∧ sort B
+sort (A ∨ B) = {!!}
+sort (A ⊃ B) = {!!}
+sort (¬ A)   = {!!}
+
 dist : 論理式 → 論理式
 dist < x > = < x >
-dist (A ∧ (B ∨ C)) = dist ((A ∧ B) ∨ (A ∧ C))
-dist ((A ∨ B) ∧ C) = dist ((A ∧ C) ∨ (B ∧ C))
+--dist (A ∧ (B ∨ C)) = dist ((A ∧ B) ∨ (A ∧ C))
+--dist ((A ∨ B) ∧ C) = dist ((A ∧ C) ∨ (B ∧ C))
 dist (A ∧ B) = dist A ∧ dist B
 dist (A ∨ B) = dist A ∨ dist B
 dist (A ⊃ B) = dist A ⊃ dist B
@@ -105,8 +125,8 @@ lemma2 (A ∧ B) v rewrite lemma2 A v | lemma2 B v = refl
 lemma2 (A ∨ B) v rewrite lemma2 A v | lemma2 B v = refl
 lemma2 (A ⊃ B) v rewrite lemma2 A v | lemma2 B v = refl
 lemma2 (¬ < x >)   v = refl
-lemma2 (¬ (A ∧ B)) v = ?
-lemma2 (¬ (A ∨ B)) v = ?
+lemma2 (¬ (A ∧ B)) v = {!!}
+lemma2 (¬ (A ∨ B)) v = {!!}
 lemma2 (¬ (A ⊃ B)) v rewrite lemma2 A v | lemma2 B v = refl
 lemma2 (¬ (¬ A))   v rewrite lemma2 (¬ A) v = refl
 
