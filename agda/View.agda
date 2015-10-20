@@ -163,81 +163,154 @@ _!_ : {A : Set}(xs : List A)(n : Nat) → Lookup xs n
 (x ∷ xs) ! suc .(index p)       | inside y p = inside y (tl p)
 (x ∷ xs) ! suc .(length xs + m) | outside m  = outside m
 
--- A type checker for λ-calculus
-infixr 30 _⇒_
-data Type : Set where
-  ı   : Type
-  _⇒_ : Type → Type → Type
+module lambda where
 
-data Equal? : Type → Type → Set where
-  yes : ∀ {τ}   → Equal? τ τ
-  no  : ∀ {σ τ} → Equal? σ τ
+  -- A type checker for λ-calculus
+  infixr 30 _⇒_
+  data Type : Set where
+    ı   : Type
+    _⇒_ : Type → Type → Type
 
-_=?=_ : (σ τ : Type) → Equal? σ τ
-ı       =?= ı       = yes
-ı       =?= (_ ⇒ _) = no
-(_ ⇒ _) =?= ı       = no
-σ₁ ⇒ τ₁ =?= σ₂ ⇒ τ₂ with σ₁ =?= σ₂ | τ₁ =?= τ₂
-σ₁ ⇒ τ₁ =?= .σ₁ ⇒ .τ₁ | yes | yes = yes
-σ₁ ⇒ τ₁ =?= σ₂ ⇒ τ₂   | _   | _   = no
+  data Equal? : Type → Type → Set where
+    yes : ∀ {τ}   → Equal? τ τ
+    no  : ∀ {σ τ} → Equal? σ τ
 
-infixl 80 _$_
-data Raw : Set where
-  var : Nat → Raw
-  _$_ : Raw → Raw → Raw -- function application
-  lam : Type → Raw → Raw
+  _=?=_ : (σ τ : Type) → Equal? σ τ
+  ı       =?= ı       = yes
+  ı       =?= (_ ⇒ _) = no
+  (_ ⇒ _) =?= ı       = no
+  σ₁ ⇒ τ₁ =?= σ₂ ⇒ τ₂ with σ₁ =?= σ₂ | τ₁ =?= τ₂
+  σ₁ ⇒ τ₁ =?= .σ₁ ⇒ .τ₁ | yes | yes = yes
+  σ₁ ⇒ τ₁ =?= σ₂ ⇒ τ₂   | _   | _   = no
 
-t1 : Type
-t1 = ı
+  infixl 80 _$_
+  data Raw : Set where
+    var : Nat → Raw
+    _$_ : Raw → Raw → Raw -- function application
+    lam : Type → Raw → Raw
 
-v1 : Raw
-v1 = var 3
+  t1 : Type
+  t1 = ı
 
-v2 : Raw
-v2 = lam t1 v1
+  v1 : Raw
+  v1 = var 3
 
-v3 : Raw
-v3 = lam (ı ⇒ ı) {!!} $ var 3
+  v2 : Raw
+  v2 = lam t1 v1
 
-Cxt = List Type
+  Cxt = List Type
+  {-
+  v3 : Raw
+  v3 = lam (ı ⇒ ı) {!!} $ var 3
 
-succ : Raw
-succ = lam {!!} (lam {!!} (lam {!!} (var 1 $ (var 2 $ var 1 $ var 0))))
+  succ : Raw
+  succ = lam {!!} (lam {!!} (lam {!!} (var 1 $ (var 2 $ var 1 $ var 0))))
+  -}
 
-data Term (Γ : Cxt) : Type → Set where
-  var : ∀ {τ} → τ ∈ Γ → Term Γ τ
-  _$_ : ∀ {σ τ} → Term Γ (σ ⇒ τ) → Term Γ σ → Term Γ τ
-  lam : ∀ σ {τ} → Term (σ ∷ Γ) τ → Term Γ (σ ⇒ τ)
+  data Term (Γ : Cxt) : Type → Set where
+    var : ∀ {τ} → τ ∈ Γ → Term Γ τ
+    _$_ : ∀ {σ τ} → Term Γ (σ ⇒ τ) → Term Γ σ → Term Γ τ
+    lam : ∀ σ {τ} → Term (σ ∷ Γ) τ → Term Γ (σ ⇒ τ)
 
-erase : ∀ {Γ τ} → Term Γ τ → Raw
-erase (var x)   = var (index x)
-erase (t $ u)   = erase t $ erase u
-erase (lam σ t) = lam σ (erase t)
+  erase : ∀ {Γ τ} → Term Γ τ → Raw
+  erase (var x)   = var (index x)
+  erase (t $ u)   = erase t $ erase u
+  erase (lam σ t) = lam σ (erase t)
 
-data Infer (Γ : Cxt) : Raw → Set where
-  ok  : (τ : Type)(t : Term Γ τ) → Infer Γ (erase t)
-  bad : {e : Raw} → Infer Γ e
+  data Infer (Γ : Cxt) : Raw → Set where
+    ok  : (τ : Type)(t : Term Γ τ) → Infer Γ (erase t)
+    bad : {e : Raw} → Infer Γ e
 
-infer : (Γ : Cxt)(e : Raw) → Infer Γ e
- -- var
-infer Γ (var n) with Γ ! n
-infer Γ (var .(index i))      | inside σ i = ok σ (var i)
-infer Γ (var .(length Γ + n)) | outside n  = bad
- -- apply
-infer Γ (e1 $ e2) with infer Γ e1 | infer Γ e2
-infer Γ (e1 $ e2)         | bad          | _   = bad
-infer Γ (.(erase t) $ e2) | ok ı t       | _   = bad
-infer Γ (.(erase t) $ e2) | ok (σ ⇒ τ) t | bad = bad
-infer Γ (.(erase t1) $ .(erase t2)) | ok (σ ⇒ τ) t1 | ok σ' t2 with σ =?= σ'
-infer Γ (.(erase t1) $ .(erase t2)) | ok (σ ⇒ τ) t1 | ok σ' t2 | no  = bad
-infer Γ (.(erase t1) $ .(erase t2)) | ok (σ ⇒ τ) t1 | ok .σ t2 | yes = ok τ (t1 $ t2)
- -- lambda
-infer Γ (lam σ e) with infer (σ ∷ Γ) e
-infer Γ (lam σ .(erase t)) | ok τ t = ok (σ ⇒ τ) (lam σ t)
-infer Γ (lam σ e)          | bad    = bad
-
+  infer : (Γ : Cxt)(e : Raw) → Infer Γ e
+   -- var
+  infer Γ (var n) with Γ ! n
+  infer Γ (var .(index i))      | inside σ i = ok σ (var i)
+  infer Γ (var .(length Γ + n)) | outside n  = bad
+   -- apply
+  infer Γ (e1 $ e2) with infer Γ e1 | infer Γ e2
+  infer Γ (e1 $ e2)         | bad          | _   = bad
+  infer Γ (.(erase t) $ e2) | ok ı t       | _   = bad
+  infer Γ (.(erase t) $ e2) | ok (σ ⇒ τ) t | bad = bad
+  infer Γ (.(erase t1) $ .(erase t2)) | ok (σ ⇒ τ) t1 | ok σ' t2 with σ =?= σ'
+  infer Γ (.(erase t1) $ .(erase t2)) | ok (σ ⇒ τ) t1 | ok σ' t2 | no  = bad
+  infer Γ (.(erase t1) $ .(erase t2)) | ok (σ ⇒ τ) t1 | ok .σ t2 | yes = ok τ (t1 $ t2)
+   -- lambda
+  infer Γ (lam σ e) with infer (σ ∷ Γ) e
+  infer Γ (lam σ .(erase t)) | ok τ t = ok (σ ⇒ τ) (lam σ t)
+  infer Γ (lam σ e)          | bad    = bad
 
 module Exercise3-2 where
-  data Infer : Set where
+
+  infixr 30 _⇒_
+  data Type : Set where
+    ı   : Type
+    _⇒_ : Type → Type → Type
+
+  data _≠_ : Type → Type → Set where
+
+  data Equal? : Type → Type → Set where
+    yes : ∀ {τ}   → Equal? τ τ
+    no  : ∀ {σ τ} → σ ≠ τ → Equal? σ τ
+
+  _=?=_ : (σ τ : Type) → Equal? σ τ
+  ı       =?= ı       = yes
+  ı       =?= (_ ⇒ _) = no {!!}
+  (_ ⇒ _) =?= ı       = no {!!}
+  σ₁ ⇒ τ₁ =?= σ₂ ⇒ τ₂ with σ₁ =?= σ₂ | τ₁ =?= τ₂
+  σ₁ ⇒ τ₁ =?= .σ₁ ⇒ .τ₁ | yes | yes = yes
+  σ₁ ⇒ τ₁ =?= σ₂ ⇒ τ₂   | _   | _   = no {!!}
+
+  infixl 80 _$_
+  data Raw : Set where
+    var : Nat → Raw
+    _$_ : Raw → Raw → Raw -- function application
+    lam : Type → Raw → Raw
+
+  Cxt = List Type
+
+  data Term (Γ : Cxt) : Type → Set where
+    var : ∀ {τ} → τ ∈ Γ → Term Γ τ
+    _$_ : ∀ {σ τ} → Term Γ (σ ⇒ τ) → Term Γ σ → Term Γ τ
+    lam : ∀ σ {τ} → Term (σ ∷ Γ) τ → Term Γ (σ ⇒ τ)
+
+  erase : ∀ {Γ τ} → Term Γ τ → Raw
+  erase (var x)   = var (index x)
+  erase (t $ u)   = erase t $ erase u
+  erase (lam σ t) = lam σ (erase t)
+
+  data BadTerm (Γ : Cxt) : Set where
+    bvar : {n : Nat} (e : Raw) → (prf : Lookup Γ n) → ? → BadTerm Γ
+
+  eraseBad : {Γ : Cxt} → BadTerm Γ → Raw
+  eraseBad e = ?
+  --eraseBad
+
+  data Infer (Γ : Cxt) : Raw → Set where
+    ok  : (τ : Type)(t : Term Γ τ) → Infer Γ (erase t)
+    bad : (b : BadTerm Γ) → Infer Γ (eraseBad b)
+
+  infer : (Γ : Cxt)(e : Raw) → Infer Γ e
+  infer Γ (var n) with Γ ! n
+  infer Γ (var .(index i))      | inside σ i = ok σ (var i)
+  infer Γ (var .(length Γ + n)) | outside n  = bad ?
+  infer Γ (e $ e₁) = {!!}
+  infer Γ (lam x e) = {!!}
+{-
+   -- var
+  infer Γ (var n) with Γ ! n
+  infer Γ (var .(index i))      | inside σ i = ok σ (var i)
+  infer Γ (var .(length Γ + n)) | outside n  = ? --bad ?
+   -- apply
+  infer Γ (e1 $ e2) with infer Γ e1 | infer Γ e2
+  infer Γ (e1 $ e2)         | _        | _   = bad 
+  infer Γ (.(erase t) $ e2) | ok ı t       | _   = bad 
+  infer Γ (.(erase t) $ e2) | ok (σ ⇒ τ) t | bad b  = bad
+  infer Γ (.(erase t1) $ .(erase t2)) | ok (σ ⇒ τ) t1 | ok σ' t2 with σ =?= σ'
+  infer Γ (.(erase t1) $ .(erase t2)) | ok (σ ⇒ τ) t1 | ok σ' t2 | no prf = bad
+  infer Γ (.(erase t1) $ .(erase t2)) | ok (σ ⇒ τ) t1 | ok .σ t2 | yes = ok τ (t1 $ t2)  
+ -- lambda
+  infer Γ (lam σ e) with infer (σ ∷ Γ) e
+  infer Γ (lam σ .(erase t)) | ok τ t = ok (σ ⇒ τ) (lam σ t)
+  infer Γ (lam σ e)          | bad    = bad
 -}
 
