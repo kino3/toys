@@ -66,9 +66,20 @@ _⇔_ : Set → Set → Set
 A ⇔ B = (A → B) × (B → A)
 infix 0 _⇔_
 
--- SetではなくDecなのではないか？
 トートロジー : 論理式 → Set
 トートロジー A = (v : 付値) → v ⟦ A ⟧ ≈ t
+
+{-
+open import Relation.Nullary hiding (¬_)
+Theorem1-1 : (A : 論理式) → Dec (トートロジー A)
+Theorem1-1 < x > = {!!}
+Theorem1-1 ⊤ = yes (λ v → refl)
+Theorem1-1 ⊥ = no  (λ x → {!!})
+Theorem1-1 (A ∧ A₁) = {!!}
+Theorem1-1 (A ∨ A₁) = {!!}
+Theorem1-1 (A ⊃ A₁) = {!!}
+Theorem1-1 (¬ A) = {!!}
+-}
 
 充足可能 : 論理式 → Set
 充足可能 A = Σ[ v ∈ 付値 ] v ⟦ A ⟧ ≈ t
@@ -171,7 +182,7 @@ lemma' A B v prf | f with v ⟦ B ⟧
 lemma' A B v prf | f | t = prf
 lemma' A B v prf | f | f = refl
 
-open ≡-Reasoning
+
 -- 例1.7でもある。
 定理1-4-4 : (A B C : 論理式) (p : 命題変数) → A ∼ B → C [ p ≔ A ] ∼ C [ p ≔ B ]
 定理1-4-4 A B < q >   p A∼B v with p == q -- (1)
@@ -179,40 +190,15 @@ open ≡-Reasoning
 ... | f = 定理1-4-1 < q > v -- qがpと異なるとき、がこれ。
 定理1-4-4 A B ⊤       p A∼B v = refl
 定理1-4-4 A B ⊥       p A∼B v = refl
-定理1-4-4 A B (D ∧ E) p A∼B v = lemma1 (定理1-4-4 A B D p A∼B) (定理1-4-4 A B E p A∼B)
+定理1-4-4 A B (D ∧ E) p A∼B v = {!!}
+--lemma1 (定理1-4-4 A B D p A∼B) (定理1-4-4 A B E p A∼B)
+{-
   where
     lemma1 : D [ p ≔ A ] ∼ D [ p ≔ B ] 
            → E [ p ≔ A ] ∼ E [ p ≔ B ] 
            → v ⟦ (D ∧ E) [ p ≔ A ] ≡ (D ∧ E) [ p ≔ B ] ⟧ ≈ t
-    lemma1 Da∼Db Ea∼Eb = lemma ((D ∧ E) [ p ≔ A ]) ((D ∧ E) [ p ≔ B ]) v {!!}
-
-{-
-      begin 
-        v ⟦ (D ∧ E) [ p ≔ A ] ≡ (D ∧ E) [ p ≔ B ] ⟧
-      ≡⟨ {!!} ⟩ 
-        {!(v ⟦ (D ∧ E) [ p ≔ A ] ⟧ ⊃ v ⟦ (D ∧ E) [ p ≔ B ] ⟧) ∧ (v ⟦ (D ∧ E) [ p ≔ B ] ⟧ ⊃ v ⟦ (D ∧ E) [ p ≔ A ] ⟧)!} 
-      ≡⟨ {!!} ⟩
-        {!!} 
-      ≡⟨ {!!} ⟩
-        t
-      ∎
+    lemma1 Da∼Db Ea∼Eb = {!!}
 -}
-{-
- Da∼Db
- v ⟦ D [ p ≔ A ] ≡ D [ p ≔ B ] ⟧ ≈ t
-
-   v ⟦ (D ∧ E) [ p ≔ A ] ⟧ ≈ t
- → v ⟦ D [ p ≔ A ] ∧ E [ p ≔ A ] ⟧ ≈ t
- → v ⟦ D [ p ≔ A ] ⟧ and v ⟦ E [ p ≔ A ] ⟧ ≈ t
- → v ⟦ D [ p ≔ B ] ⟧ and v ⟦ E [ p ≔ B ] ⟧ ≈ t by I.H.
- → v ⟦ D [ p ≔ B ] ∧ E [ p ≔ B ] ⟧ ≈ t
- → v ⟦ (D ∧ E) [ p ≔ B ] ⟧ ≈ t
- → 
--}    
-
-
--- D [ p ≔ A ] ∼ D [ p ≔ B ] --> (v : 付値) → v ⟦ D [ p ≔ A ] ≡ D [ p ≔ B ] ⟧ ≈ t
--- E [ p ≔ A ] ∼ E [ p ≔ B ]
 定理1-4-4 A B (D ∨ E) p A∼B v = {!!}
 定理1-4-4 A B (D ⊃ E) p A∼B v = {!!}
 定理1-4-4 A B (¬ D)   p A∼B v = {!!}

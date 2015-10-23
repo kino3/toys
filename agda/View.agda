@@ -41,7 +41,7 @@ isEven .(suc (k * 2)) |  odd k = false
 -- Finding an element in a list
 
 open import Function using (_∘_)
-open import Data.List
+open import Data.List hiding (filter)
 
 
 infixr 30 _:all:_
@@ -251,7 +251,7 @@ module Exercise3-2 where
   data Equal? : Type → Type → Set where
     yes : ∀ {τ}   → Equal? τ τ
     no  : ∀ {σ τ} → σ ≠ τ → Equal? σ τ
-
+  {-
   _=?=_ : (σ τ : Type) → Equal? σ τ
   ı       =?= ı       = yes
   ı       =?= (_ ⇒ _) = no {!!}
@@ -279,10 +279,10 @@ module Exercise3-2 where
   erase (lam σ t) = lam σ (erase t)
 
   data BadTerm (Γ : Cxt) : Set where
-    bvar : {n : Nat} (e : Raw) → (prf : Lookup Γ n) → ? → BadTerm Γ
+    bvar : (n : Nat) → BadTerm Γ
 
   eraseBad : {Γ : Cxt} → BadTerm Γ → Raw
-  eraseBad e = ?
+  eraseBad (bvar n) = var n
   --eraseBad
 
   data Infer (Γ : Cxt) : Raw → Set where
@@ -292,9 +292,10 @@ module Exercise3-2 where
   infer : (Γ : Cxt)(e : Raw) → Infer Γ e
   infer Γ (var n) with Γ ! n
   infer Γ (var .(index i))      | inside σ i = ok σ (var i)
-  infer Γ (var .(length Γ + n)) | outside n  = bad ?
+  infer Γ (var .(length Γ + n)) | outside n  = bad (bvar (length Γ + n))
   infer Γ (e $ e₁) = {!!}
   infer Γ (lam x e) = {!!}
+  -}
 {-
    -- var
   infer Γ (var n) with Γ ! n
@@ -313,4 +314,33 @@ module Exercise3-2 where
   infer Γ (lam σ .(erase t)) | ok τ t = ok (σ ⇒ τ) (lam σ t)
   infer Γ (lam σ e)          | bad    = bad
 -}
+
+module Exercise3-3 where
+  filter : {A : Set} → (A → Bool) → List A → List A
+  filter p []        = []
+  filter p (x ∷ xs) with p x
+  ... | true  = x ∷ filter p xs
+  ... | false = filter p xs
+
+  lemma-All-∈ : ∀ {A x xs} {P : A → Set} → All P xs → x ∈ xs → P x
+  lemma-All-∈ all[] ()
+  lemma-All-∈ (px :all: pxs) hd        = px
+  lemma-All-∈ (px :all: pxs) (tl x∈xs) = lemma-All-∈ pxs x∈xs
+
+  lem-filter-sound : {A : Set}(p : A → Bool)(xs : List A) → All (satisfies p) (filter p xs)
+  lem-filter-sound p []       = all[]
+  lem-filter-sound p (x ∷ xs) with inspect (p x)
+  lem-filter-sound p (x ∷ xs) | it y prf with p x | prf
+  lem-filter-sound p (x ∷ xs) | it .true  prf | true  | refl = trueIsTrue prf :all: lem-filter-sound p xs
+  lem-filter-sound p (x ∷ xs) | it .false prf | false | refl = lem-filter-sound p xs
+
+  lem-filter-complete : {A : Set}(p : A → Bool)(x : A){xs : List A} → x ∈ xs → satisfies p x → x ∈ filter p xs
+  lem-filter-complete p x hd px      with inspect (p x)
+  lem-filter-complete p x hd px | it y prf with p x | prf
+  lem-filter-complete p x hd px | it .true  prf | true  | refl = hd
+  lem-filter-complete p x hd () | it .false prf | false | refl
+  lem-filter-complete p x (tl x∈xs) px with inspect (p x)
+  lem-filter-complete p x (tl x∈xs) px | it y prf with p x | prf
+  lem-filter-complete p x (tl x∈xs) px | it .true prf  | true  | refl = lem-filter-complete p x {!x∈xs!} (trueIsTrue prf)
+  lem-filter-complete p x (tl x∈xs) () | it .false prf | false | refl
 
