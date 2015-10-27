@@ -336,17 +336,17 @@ module Exercise3-3 where
 
   lem-filter-complete : {A : Set}(p : A → Bool)(x : A){xs : List A} → x ∈ xs → satisfies p x → x ∈ filter p xs
   lem-filter-complete p x {[]} () px
-  lem-filter-complete {A} p x {.x ∷ xs} hd       px with inspect (p x)
+  lem-filter-complete p x {.x ∷ xs} hd       px with inspect (p x)
   lem-filter-complete p x {.x ∷ xs} hd px | it b prf with p x | prf
   lem-filter-complete p x {.x ∷ xs} hd px | it .true prf  | true  | refl = hd
   lem-filter-complete p x {.x ∷ xs} hd () | it .false prf | false | refl
-  lem-filter-complete {A} p x {y ∷ xs} (tl x∈xs) px with inspect (p x)
-  lem-filter-complete {A} p x {y ∷ xs} (tl x∈xs) px | it z prf with p x | prf 
-  lem-filter-complete {A} p x {y ∷ xs} (tl x∈xs) px | it .true prf  | true  | refl with inspect (p y)
-  lem-filter-complete {A} p x {y ∷ xs} (tl x∈xs) px | it .true prf  | true  | refl | it z2 prf2 with p y | prf2
-  lem-filter-complete {A} p x {y ∷ xs} (tl x∈xs) px | it .true prf  | true  | refl | it .true  prf2 | true  | refl 
-    = tl (lem-filter-complete {A} p x {xs} x∈xs (trueIsTrue prf))
-  lem-filter-complete {A} p x {y ∷ xs} (tl x∈xs) px | it .true prf  | true  | refl | it .false prf2 | false | refl 
-    = lem-filter-complete {A} p x {xs} x∈xs (trueIsTrue prf)
-  lem-filter-complete {A} p x {y ∷ xs} (tl x∈xs) () | it .false prf | false | refl
+  lem-filter-complete p x {y ∷ xs} (tl x∈xs) px with inspect (p x)
+  lem-filter-complete p x {y ∷ xs} (tl x∈xs) px | it z prf with p x | prf 
+  lem-filter-complete p x {y ∷ xs} (tl x∈xs) px | it .true prf  | true  | refl with inspect (p y)
+  lem-filter-complete p x {y ∷ xs} (tl x∈xs) px | it .true prf  | true  | refl | it z2 prf2 with p y | prf2
+  lem-filter-complete p x {y ∷ xs} (tl x∈xs) px | it .true prf  | true  | refl | it .true  prf2 | true  | refl 
+    = tl (lem-filter-complete p x {xs} x∈xs (trueIsTrue prf))
+  lem-filter-complete p x {y ∷ xs} (tl x∈xs) px | it .true prf  | true  | refl | it .false prf2 | false | refl 
+    = lem-filter-complete p x {xs} x∈xs (trueIsTrue prf)
+  lem-filter-complete p x {y ∷ xs} (tl x∈xs) () | it .false prf | false | refl
 
