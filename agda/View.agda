@@ -350,3 +350,50 @@ module Exercise3-3 where
     = lem-filter-complete p x {xs} x∈xs (trueIsTrue prf)
   lem-filter-complete p x {y ∷ xs} (tl x∈xs) () | it .false prf | false | refl
 
+module Exercise3-4 where
+  open import Data.String renaming (_++_ to _+++_)
+  Tag = String
+  
+  mutual
+    data Schema : Set where
+      tag : Tag → List Child → Schema
+
+    data Child : Set where
+      text : Child
+      elem : Nat → Nat → Schema → Child
+
+  data BList (A : Set) : Nat → Set where
+    [] : ∀ {n} → BList A n
+    _::_ : ∀ {n} → A → BList A n → BList A (suc n)
+
+  data Cons (A B : Set) : Set where
+    _::_ : A → B → Cons A B
+
+  FList : Set → Nat → Nat → Set
+  FList A zero m          = BList A m
+  FList A (suc n) zero    = ⊥
+  FList A (suc n) (suc m) = Cons A (FList A n m)
+
+  mutual
+    data XML : Schema → Set where
+      element : ∀ {kids}{t : Tag} → All Element kids → XML (tag t kids)
+
+    Element : Child → Set
+    Element text = String
+    Element (elem n m s) = FList (XML s) n m
+
+  schema1 : Schema
+  schema1 = tag "Root" (text ∷ elem 0 1 (tag "Leaf" []) ∷ [])
+
+  sampleXML : XML schema1
+  sampleXML = element ("piyo" :all: (element all[] :: []) :all: all[])
+
+  mutual
+    printXML : {s : Schema} → XML s → String
+    printXML {tag t kids} (element {.kids} {.t} elements) 
+      = "<" +++ t +++ ">" +++ printChildren elements +++ "</" +++ t +++ ">"
+
+    printChildren : {kids : List Child} → All Element kids → String
+    printChildren all[] = ""
+    printChildren {text ∷ xs}      (str :all: cs) = {!!}
+    printChildren {elem n m s ∷ xs} (fl :all: cs) = {!!}
