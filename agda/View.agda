@@ -395,5 +395,12 @@ module Exercise3-4 where
 
     printChildren : {kids : List Child} → All Element kids → String
     printChildren all[] = ""
-    printChildren {text ∷ xs}      (str :all: cs) = {!!}
-    printChildren {elem n m s ∷ xs} (fl :all: cs) = {!!}
+    printChildren {text ∷ xs}                   (str :all: cs) = str +++ printChildren cs
+    printChildren {elem zero     zero   s ∷ xs} ([] :all: cs)  = printChildren cs
+    printChildren {elem zero    (suc m) s ∷ xs} ([] :all: cs)  = printChildren cs
+    printChildren {elem zero    (suc m) s ∷ xs} ((x :: bl) :all: cs) = printXML x +++ printChildren {elem zero m s ∷ xs} (bl :all: cs)
+    printChildren {elem (suc n)  zero   s ∷ xs} (() :all: cs)
+    printChildren {elem (suc n) (suc m) s ∷ xs} ((x :: fl) :all: cs) = printXML x +++ printChildren {elem n m s ∷ xs} (fl :all: cs)
+
+open Exercise3-4 public
+
