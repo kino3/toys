@@ -11,10 +11,11 @@ module Logic-in-IS where
 
 -------------------------
 -- 1.1 形式化ということ
+-------------------------
 
 -------------------------
 -- 1.2 命題と論理式
-
+-------------------------
 module Semantics where
 
 open import Data.Char
@@ -42,6 +43,7 @@ open import Data.Bool
 
 -------------------------
 -- 1.3 論理式と真偽
+-------------------------
 
 -- P.9
 付値 = 命題変数 → Bool
@@ -106,6 +108,7 @@ Theorem1-1 (¬ A) = {!!}
    v _   = f
 -------------------------
 -- 1.4 論理的に同値な論理式
+-------------------------
 
 -- equivalent
 _≡_ : 論理式 → 論理式 → 論理式
@@ -142,17 +145,25 @@ A と B は P である = P A B
 論理的に同値 : 論理式 → 論理式 → Set
 論理的に同値 A B = 論理式 A ≡ B が トートロジー である
 
+-- 問1-4より、これも同じこと。 
 論理的に同値' : 論理式 → 論理式 → Set
 論理的に同値' A B = ∀ v → v ⟦ A ⟧ ≈ v ⟦ B ⟧
 
+-- Agdaの証明に便利なので、後者を採用する。
 _∼_ : 論理式 → 論理式 → Set
-A ∼ B = A と B は 論理的に同値 である
+A ∼ B = A と B は 論理的に同値' である
 
 定理1-4-1 : (A : 論理式) → A ∼ A
-定理1-4-1 A v with v ⟦ A ⟧
-定理1-4-1 A v | t = refl
-定理1-4-1 A v | f = refl
+定理1-4-1 A v = refl
 
+定理1-4-2 : (A B : 論理式) → A ∼ B → B ∼ A
+定理1-4-2 A B prf v = sym (prf v)
+
+定理1-4-3 : (A B C : 論理式) → A ∼ B → B ∼ C → A ∼ C
+定理1-4-3 A B C A∼B B∼C v = trans (A∼B v) (B∼C v)
+
+-- 論理式Cの中の命題変数のいくつかの出現を論理式Aでおきかえて得られる論理式を
+-- C [ p ≔ A ] と表す。
 _[_≔_] : 論理式 → 命題変数 → 論理式 → 論理式
 < x > [ p ≔ A ] with p == x
 ... | t = A
@@ -164,82 +175,27 @@ _[_≔_] : 論理式 → 命題変数 → 論理式 → 論理式
 (C1 ⊃ C2) [ p ≔ A ] = C1 [ p ≔ A ] ⊃ C2 [ p ≔ A ]
 (¬ C) [ p ≔ A ]     = ¬ (C [ p ≔ A ])
 
-lemma : (A B : 論理式) (v : 付値) → v ⟦ A ⟧ ≈ v ⟦ B ⟧ → v ⟦ A ≡ B ⟧ ≈ t
-lemma A B v with v ⟦ A ⟧ 
-lemma A B v | t with v ⟦ B ⟧
-lemma A B v | t | t = λ _ → refl
-lemma A B v | t | f = λ ()
-lemma A B v | f with v ⟦ B ⟧
-lemma A B v | f | t = λ ()
-lemma A B v | f | f = λ _ → refl
-
-lemma' : (A B : 論理式) (v : 付値) → v ⟦ A ≡ B ⟧ ≈ t → v ⟦ A ⟧ ≈ v ⟦ B ⟧ 
-lemma' A B v prf with v ⟦ A ⟧
-lemma' A B v prf | t with v ⟦ B ⟧
-lemma' A B v prf | t | t = refl
-lemma' A B v prf | t | f = sym prf
-lemma' A B v prf | f with v ⟦ B ⟧
-lemma' A B v prf | f | t = prf
-lemma' A B v prf | f | f = refl
-
-
--- 例1.7でもある。
 定理1-4-4 : (A B C : 論理式) (p : 命題変数) → A ∼ B → C [ p ≔ A ] ∼ C [ p ≔ B ]
+-- 証明が例1.7
 定理1-4-4 A B < q >   p A∼B v with p == q -- (1)
 ... | t = A∼B v  -- Cがある命題変数qに等しいとき、がこれ。
 ... | f = 定理1-4-1 < q > v -- qがpと異なるとき、がこれ。
 定理1-4-4 A B ⊤       p A∼B v = refl
 定理1-4-4 A B ⊥       p A∼B v = refl
-定理1-4-4 A B (D ∧ E) p A∼B v = {!!}
---lemma1 (定理1-4-4 A B D p A∼B) (定理1-4-4 A B E p A∼B)
-{-
-  where
-    lemma1 : D [ p ≔ A ] ∼ D [ p ≔ B ] 
-           → E [ p ≔ A ] ∼ E [ p ≔ B ] 
-           → v ⟦ (D ∧ E) [ p ≔ A ] ≡ (D ∧ E) [ p ≔ B ] ⟧ ≈ t
-    lemma1 Da∼Db Ea∼Eb = {!!}
--}
-定理1-4-4 A B (D ∨ E) p A∼B v = {!!}
-定理1-4-4 A B (D ⊃ E) p A∼B v = {!!}
-定理1-4-4 A B (¬ D)   p A∼B v = {!!}
+-- 帰納法の仮定でrewriteすると、あとはAgdaでといてくれる。
+定理1-4-4 A B (D ∧ E) p A∼B v rewrite 定理1-4-4 A B D p A∼B v | 定理1-4-4 A B E p A∼B v = refl
+定理1-4-4 A B (D ∨ E) p A∼B v rewrite 定理1-4-4 A B D p A∼B v | 定理1-4-4 A B E p A∼B v = refl
+定理1-4-4 A B (D ⊃ E) p A∼B v rewrite 定理1-4-4 A B D p A∼B v | 定理1-4-4 A B E p A∼B v = refl
+定理1-4-4 A B (¬ D)   p A∼B v rewrite 定理1-4-4 A B D p A∼B v = refl
 
 -------------------------
 -- 1.5 標準形
+-------------------------
 
-postulate 
-  nf : 論理式 → 論理式
-
-_=!=_ : 論理式 → 論理式 → Bool
-< x > =!= < y > = x == y
-< x > =!= _ = f
-⊤ =!= ⊤ = t
-⊤ =!= _ = f
-⊥ =!= ⊥ = t
-⊥ =!= _ = f
-(x1 ∧ x2) =!= (y1 ∧ y2) = x1 =!= y1 and x2 =!= y2
-(x1 ∧ x2) =!= _ = f
-(x1 ∨ x2) =!= (y1 ∨ y2) = x1 =!= y1 and x2 =!= y2
-(x1 ∨ x2) =!= _ = f
-(x1 ⊃ x2) =!= (y1 ⊃ y2) = x1 =!= y1 and x2 =!= y2
-(x1 ⊃ x2) =!= _ = f
-¬ x =!= ¬ y = x =!= y
-¬ x =!= _ = f
-
-exam3-1 : (P : 論理式) → P ∼ nf(P)
-exam3-1 < x > v = {!!}
-exam3-1 ⊤ v = {!!}
-exam3-1 ⊥ v = {!!}
-exam3-1 (p ∧ p₁) v = {!!}
-exam3-1 (p ∨ p₁) v = {!!}
-exam3-1 (p ⊃ p₁) v = {!!}
-exam3-1 (¬ p) v = {!!}
-
-exam3-2 : {P Q : 論理式} → P ∼ Q → T (nf(P) =!= nf(Q))
-exam3-2 prf = {!!}
 
 -------------------------
 -- 1.6 形式体系における証明
-
+-------------------------
 module LK where
 -- P.23
 
