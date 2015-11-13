@@ -71,17 +71,31 @@ infix 0 _⇔_
 トートロジー : 論理式 → Set
 トートロジー A = (v : 付値) → v ⟦ A ⟧ ≈ t
 
-{-
-open import Relation.Nullary hiding (¬_)
-Theorem1-1 : (A : 論理式) → Dec (トートロジー A)
-Theorem1-1 < x > = {!!}
-Theorem1-1 ⊤ = yes (λ v → refl)
-Theorem1-1 ⊥ = no  (λ x → {!!})
-Theorem1-1 (A ∧ A₁) = {!!}
-Theorem1-1 (A ∨ A₁) = {!!}
-Theorem1-1 (A ⊃ A₁) = {!!}
-Theorem1-1 (¬ A) = {!!}
--}
+open import Relation.Nullary using (yes;no;Dec)
+定理1-1 : (v : 付値) (A : 論理式) → Dec (v ⟦ A ⟧ ≈ t)
+定理1-1 v < x >   with v ⟦ < x > ⟧
+定理1-1 v < x > | t = yes refl
+定理1-1 v < x > | f = no (λ ())
+定理1-1 v ⊤       = yes refl
+定理1-1 v ⊥       = no  (λ ())
+定理1-1 v (A ∧ B) with v ⟦ A ⟧ | v ⟦ B ⟧
+定理1-1 v (A ∧ B) | t | t = yes refl
+定理1-1 v (A ∧ B) | t | f = no (λ ())
+定理1-1 v (A ∧ B) | f | t = no (λ ())
+定理1-1 v (A ∧ B) | f | f = no (λ ())
+定理1-1 v (A ∨ B) with v ⟦ A ⟧ | v ⟦ B ⟧
+定理1-1 v (A ∨ B) | t | t = yes refl
+定理1-1 v (A ∨ B) | t | f = yes refl
+定理1-1 v (A ∨ B) | f | t = yes refl
+定理1-1 v (A ∨ B) | f | f = no (λ ())
+定理1-1 v (A ⊃ B) with v ⟦ A ⟧ | v ⟦ B ⟧
+定理1-1 v (A ⊃ B) | t | t = yes refl
+定理1-1 v (A ⊃ B) | t | f = no (λ ())
+定理1-1 v (A ⊃ B) | f | t = yes refl
+定理1-1 v (A ⊃ B) | f | f = yes refl
+定理1-1 v (¬ A)   with v ⟦ A ⟧
+定理1-1 v (¬ A) | t = no (λ ())
+定理1-1 v (¬ A) | f = yes refl
 
 充足可能 : 論理式 → Set
 充足可能 A = Σ[ v ∈ 付値 ] v ⟦ A ⟧ ≈ t
