@@ -88,5 +88,42 @@ crack xs = encode (-factor) xs
 -- 5.7 Exercises
 
 -- 5.7.1
-sumpower2 :: Int -> Int
-sumpower2 n = sum [ x ^ 2 | x <- [1..n]]
+sumpower2 :: Int
+sumpower2 = sum [ x ^ 2 | x <- [1..100]]
+
+-- 5.7.2
+replicate' :: Int -> a -> [a]
+replicate' n x = [x | x' <- [1..n]]
+
+-- 5.7.3
+pyths :: Int -> [(Int, Int, Int)]
+pyths n = [(x,y,z) | x <- [1..n], y <- [1..n], z <- [1..n], x ^ 2 + y ^ 2 == z ^ 2 ]
+
+-- 5.7.4
+perfects :: Int -> [Int]
+perfects n = [ x | x <- [1..n] , sum(factors(x)) - x == x]
+
+-- 5.7.5
+ex575before :: [(Integer, Integer)]
+ex575before = [(x,y) | x <- [1,2,3], y <- [4,5,6]]
+ex575after :: [(Integer, Integer)]
+ex575after  = concat [ [ (x,y) | y <- [4,5,6]] | x <- [1,2,3] ]
+
+-- 5.7.6
+positions' :: Eq a => a -> [a] -> [Int]
+positions' x xs = find x (zip xs [0..n]) where n = length xs - 1
+
+-----------------------------------
+-- 6 再帰関数
+-----------------------------------
+
+-- 6.1
+
+factorial :: Int -> Int
+factorial n = product [1..n]
+
+-- http://www.mew.org/~kazu/doc/book/haskell.html
+-- n+k pattern はもうつかえない。
+factorial' :: Int -> Int
+factorial' 0 = 1
+factorial' n = n * factorial' (n - 1)
