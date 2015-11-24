@@ -68,10 +68,10 @@ _⇔_ : Set → Set → Set
 A ⇔ B = (A → B) × (B → A)
 infix 0 _⇔_
 
+open import Relation.Nullary using (yes;no;Dec)
 トートロジー : 論理式 → Set
 トートロジー A = (v : 付値) → v ⟦ A ⟧ ≈ t
 
-open import Relation.Nullary using (yes;no;Dec)
 定理1-1 : (v : 付値) (A : 論理式) → Dec (v ⟦ A ⟧ ≈ t)
 定理1-1 v < x >   with v ⟦ < x > ⟧
 定理1-1 v < x > | t = yes refl
@@ -248,4 +248,24 @@ data _⟶_ : List 論理式 → List 論理式 → Set where
           (∨右2 [] [ A ] A (¬ A) 
           (¬右 [] [ A ] A 
           (始式 A))))) 
+
+-- P.27 定義1.3
+data 証明図[終式_] : {Γ Δ : List 論理式} → Γ ⟶ Δ → Set where
+  c1 : (A : 論理式) → 証明図[終式 (始式 A) ]
+  --c2 : ∀ {A B S} {S1 : A ⟶ B} (P1 : 証明図[終式 S1 ]) → (S1 → S) → 証明図[終式 S ]  
+
+証明可能 : (Γ Δ : List 論理式) → Γ ⟶ Δ → Set
+証明可能 Γ Δ S = 証明図[終式 S ]
+
+-- P.32 トートロジーの式への拡張
+_* : List 論理式 → 論理式
+[] *       = ⊥
+(x ∷ xs) * = x ∨ (xs *) 
+
+_` : List 論理式 → 論理式 -- 下付き*はないので代用
+[] `       = ⊤
+(x ∷ xs) ` = x ∧ (xs `)
+
+トートロジー' : (Γ Δ : List 論理式) → Γ ⟶ Δ → Set
+トートロジー' Γ Δ seq = トートロジー ((Γ `) ⊃ (Δ *))
 
