@@ -127,3 +127,28 @@ factorial n = product [1..n]
 factorial' :: Int -> Int
 factorial' 0 = 1
 factorial' n = n * factorial' (n - 1)
+-- これはマイナスのときはとまらない。。。
+
+-- 6.2
+
+product2 :: Num a => [a] -> a
+product2 [] = 1
+product2 (n:ns) = n * product2 ns
+
+length2 :: [a] -> Int
+length2 [] = 0
+length2 (_:xs) = 1 + length2 xs
+
+reverse2 :: [a] -> [a]
+reverse2 [] = []
+reverse2 (x:xs) = reverse2 xs ++ [x]
+
+{-
+reverse3 :: [a] -> [a]
+reverse3 [] = []
+reverse3 (x:xs) = reverse3 xs ++ [x]
+-}
+
+(+++) :: [a] -> [a] -> [a]
+[]       +++ ys = ys
+(x : xs) +++ ys = x : (xs +++ ys)
