@@ -152,3 +152,36 @@ reverse3 (x:xs) = reverse3 xs ++ [x]
 (+++) :: [a] -> [a] -> [a]
 []       +++ ys = ys
 (x : xs) +++ ys = x : (xs +++ ys)
+
+insert :: Ord a => a -> [a] -> [a]
+insert x [] = [x]
+insert x (y : ys) | x <= y = x : y : ys
+                  | otherwise = y : insert x ys
+
+isort :: Ord a => [a] -> [a]
+isort [] = []
+isort (x : xs) = insert x (isort xs)
+
+-- 6.8 Exercises
+
+-- 6.8.4
+merge :: Ord a => [a] -> [a] -> [a]
+merge [] xs = xs
+merge xs [] = xs
+merge (x : xs) (y : ys) | x <= y    = x : merge xs (y : ys)
+                        | otherwise = y : merge (x : xs) ys
+
+-- 6.8.5
+halve :: [a] -> ([a], [a])
+halve xs = splitAt (length xs `div` 2) xs
+
+msort :: Ord a => [a] -> [a]
+msort []  = [] 
+msort [x] = [x]
+msort xs  = merge (msort ys) (msort zs) where (ys,zs) = halve xs
+
+-- 6.8.6
+take' :: Int -> [a] -> [a]
+take' 0 _        = []
+take' _ []       = []
+take' n (x : xs) = x : (take' (n-1) xs)
