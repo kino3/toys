@@ -197,3 +197,25 @@ twice f x = f (f x)
 -- 7.2
 map' :: (a -> b) -> [a] -> [b]
 map' f xs = [f x | x <- xs]
+
+-- 7.3
+foldr' :: (a -> b -> b) -> b -> [a] -> b
+foldr' f v [] = v
+foldr' f v (x : xs) = f x (foldr' f v xs)
+
+length' :: [a] -> Int
+length' = foldr' (\_ n -> 1 + n) 0
+
+snoc :: a -> [a] -> [a]
+snoc x xs = xs ++ [x]
+
+reverse3 :: [a] -> [a]
+reverse3 [] = []
+reverse3 (x : xs) = snoc x (reverse3 xs)
+
+reverse4 :: [a] -> [a]
+reverse4 = foldr' snoc []
+
+reverse5 :: [a] -> [a]
+reverse5 = foldr' (\x xs -> xs ++ [x]) []
+
