@@ -113,3 +113,39 @@ natural = token nat
 symbol :: String -> Parser String
 symbol xs = token (string xs)
 
+p87 :: Parser [Int]
+p87 = symbol "[" >>= \_ ->
+      natural >>= \n ->
+      many (symbol "," >>= \_ -> natural) >>= \ns ->
+      symbol "]" >>= \_ ->
+      return (n : ns)
+
+-- 8.8
+
+expr :: Parser Int
+expr = term >>= \t ->
+        ((symbol "+" >>= \_ ->
+          expr       >>= \e ->
+          return (t + e)) 
+         +++ return t)
+
+term :: Parser Int
+term = factor >>= \f ->
+       ((symbol "*" >>= \_ ->
+         term       >>= \t ->
+         return (f * t))
+        +++ return f)
+
+factor :: Parser Int
+factor = (symbol "(" >>= \_ ->
+          expr       >>= \e ->
+          symbol ")" >>= \_ ->
+          return e)
+         +++ natural
+
+eval :: String -> Int
+eval xs = case parse expr xs of
+             [(n, [])]  -> n
+             [(_, out)] -> error ("unused input: " ++ out)
+             []         -> error "invalid input"
+
