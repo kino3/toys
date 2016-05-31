@@ -149,3 +149,8 @@ eval xs = case parse expr xs of
              [(_, out)] -> error ("unused input: " ++ out)
              []         -> error "invalid input"
 
+
+-- 8.10
+-- 1
+int :: Parser Int
+int = ((char '-') >>= \_ -> nat >>= \n -> return (-n)) +++ nat
