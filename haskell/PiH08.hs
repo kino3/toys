@@ -153,4 +153,4 @@ eval xs = case parse expr xs of
 -- 8.10
 -- 1
 int :: Parser Int
-int = ((char '-') >>= \_ -> nat >>= \n -> return (-n)) +++ nat
+int = (char '-') >>= \_ -> nat >>= \n -> return (-n)) +++ nat
