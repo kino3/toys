@@ -4,9 +4,7 @@ module PRF where
 
 open import Data.Nat renaming (zero to nzero; suc to nsuc)
 open import Data.Product
---open import Relation.Binary.PropositionalEquality
 open import Data.Empty
---open import Relation.Nullary using (yes;no)
 
 -- cartesian product
 _^_ : Set → ℕ → Set
@@ -48,8 +46,9 @@ data PRF : ℕ → Set where
 
 -- PRFはAgdaの関数ではないので、関数の評価方法を定めないと動かない。(f xと書けない)
 eval : {n : ℕ} → PRF n → ℕ
+-- (1)
 eval zero           = 0
-eval (suc x)        = x + 1
+eval (suc x)        = nsuc x
 eval (proj {nzero}  {nzero}  prod () prf2)
 eval (proj {nzero}  {nsuc i} prod prf1 ())
 eval (proj {nsuc n} {nzero}  prod () prf2)
@@ -59,12 +58,15 @@ eval (proj {nsuc nzero}    {nsuc (nsuc i)} prod (s≤s z≤n) (s≤s ()))
 eval (proj {nsuc (nsuc n)} {nsuc nzero}    (x , xs) prf1 prf2) = x
 eval (proj {nsuc (nsuc n)} {nsuc (nsuc i)} (x , xs) prf1 (s≤s p))
   = eval (proj {nsuc n} {nsuc i} xs (s≤s z≤n) p)
-eval (cmp prf prfs) = {!!}
+-- (2)
+eval (cmp {nzero} {_} {()} g gjs)
+eval (cmp {nsuc .0} {nzero} (suc x) (zero ∷ []))          = 1 --eval (suc (eval zero))
+eval (cmp {nsuc .0} {nzero} (suc x) (proj () _ _ ∷ []))
+eval (cmp {nsuc .0} {nzero} (suc x) (cmp g gjs ∷ []))     = {!!} --eval (suc (eval (cmp g gjs)))
+eval (cmp {nsuc .0} {nzero} (proj n prf1 prf2) (g1 ∷ [])) = eval g1
+eval (cmp {nsuc .0} {nzero} {prf} (cmp {_} {_} {prf2} g gjs) (zero ∷ [])) = {!!}
+eval (cmp {nsuc .0} {nzero} (cmp g gjs) (proj x x₁ x₂ ∷ [])) = {!!}
+eval (cmp {nsuc .0} {nzero} (cmp g gjs) (cmp g1 x ∷ [])) = {!!}
+eval (cmp {nsuc _}  {nzero} g (g1 ∷ g2 ∷ g3s)) = {!!}
+eval (cmp {nsuc m} {nsuc n} {prf} g gjs) = {!!}
 
-{-
-comp : ∀ {m n} → PRF m → Vec (PRF n) m → 1 ≤ m → PRF n 
-comp g []              ()
-comp (suc x)             (g1 ∷ []) (s≤s z≤n) = {!!}
-comp (proj xs prf1 prf2) (g1 ∷ []) (s≤s z≤n) = {!!}
-comp g (g1 ∷ g2 ∷ gjs) (s≤s z≤n) = {!!}
--}
