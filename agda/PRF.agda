@@ -12,7 +12,7 @@ s ^ 0  = ⊥
 s ^ nsuc nzero = s
 s ^ nsuc n     = s × (s ^ n)
 
-{-
+
 proj : {n i : ℕ} {prf : 1 ≤ i} {prf2 : i ≤ n} → ℕ ^ n → ℕ
 proj {nzero}  {nzero}  {()} 
 proj {nzero}  {nsuc i} {s≤s prf} {()} 
@@ -21,6 +21,7 @@ proj {nsuc nzero}    {nsuc .0}       {s≤s z≤n} {s≤s z≤n}   n       = n
 proj {nsuc (nsuc n)} {nsuc .0}       {s≤s z≤n} {s≤s z≤n}  (x , xs) = x
 proj {nsuc (nsuc n)} {nsuc (nsuc i)} {s≤s z≤n} {s≤s prf2} (x , xs) = proj {nsuc n} {nsuc i} {s≤s z≤n} {prf2} xs
 
+{-
 data PRF : {n : ℕ} → (ℕ ^ n → ℕ) → Set where
   zero : PRF {0} (λ ())
   suc  : PRF {1} (λ n → n + 1)
@@ -28,26 +29,22 @@ data PRF : {n : ℕ} → (ℕ ^ n → ℕ) → Set where
 -}
 
 
-data PRF2 : Set → Set where
-  zero : PRF2 (ℕ ^ 0)
-  suc  : ℕ → PRF2 (ℕ)
-  p    : (n i : ℕ) {prf : 1 ≤ i} {prf2 : i ≤ n} → PRF2 (ℕ ^ n)
+data PRF : Set → Set where
+  zero : (n : ℕ ^ 0) → PRF (ℕ ^ 0 → ℕ)
+  suc  : (n : ℕ)     → PRF (ℕ → ℕ)
+  p    : (n i : ℕ) {prf : 1 ≤ i} {prf2 : i ≤ n} → (ns : ℕ ^ n) → PRF (ℕ ^ n → ℕ)
 
-eval : {f : Set} → PRF2 f → ℕ
-eval zero = nzero
-eval suc = {!!}
-eval (p n i) = {!!}
+eval : {a : Set} → PRF a → ℕ
+eval x = {!!}
 
-{-
-record Proj (n : ℕ) : Set where
-  field
-    product : ℕ ^ n
+open import Data.Vec
+cmp  : {m n : ℕ} {prf : 1 ≤ m} → PRF (ℕ ^ m → ℕ) → Vec (PRF (ℕ ^ n → ℕ)) m → PRF (ℕ ^ n → ℕ)
+cmp g gjs = {!!}
 
-  proj : (i : ℕ) → 1 ≤ i → i ≤ n → ℕ
-  proj nzero () prf2
-  proj (nsuc nzero) (s≤s z≤n) a     = {!!}
-  proj (nsuc (nsuc i)) (s≤s prf1) a = {!!}
--}
+rec : {n : ℕ} → PRF (ℕ ^ n → ℕ) → PRF (ℕ ^ (n + 2) → ℕ) → PRF (ℕ ^ (n + 1) → ℕ)
+rec g h = {!!}
+
+
 {-
 Proj : (n : ℕ) → (i : ℕ) → i ≤ n → ℕ ^ n → ℕ 
 Proj nzero           nzero          z≤n ()
