@@ -4,13 +4,39 @@ module PRF where
 
 open import Data.Nat renaming (zero to nzero; suc to nsuc)
 open import Data.Product
-open import Data.Empty
+open import Data.Empty using (⊥)
 
 -- cartesian product
 _^_ : Set → ℕ → Set
 s ^ 0  = ⊥
 s ^ nsuc nzero = s
 s ^ nsuc n     = s × (s ^ n)
+
+{-
+proj : {n i : ℕ} {prf : 1 ≤ i} {prf2 : i ≤ n} → ℕ ^ n → ℕ
+proj {nzero}  {nzero}  {()} 
+proj {nzero}  {nsuc i} {s≤s prf} {()} 
+proj {nsuc n} {nzero}  {()}
+proj {nsuc nzero}    {nsuc .0}       {s≤s z≤n} {s≤s z≤n}   n       = n
+proj {nsuc (nsuc n)} {nsuc .0}       {s≤s z≤n} {s≤s z≤n}  (x , xs) = x
+proj {nsuc (nsuc n)} {nsuc (nsuc i)} {s≤s z≤n} {s≤s prf2} (x , xs) = proj {nsuc n} {nsuc i} {s≤s z≤n} {prf2} xs
+
+data PRF : {n : ℕ} → (ℕ ^ n → ℕ) → Set where
+  zero : PRF {0} (λ ())
+  suc  : PRF {1} (λ n → n + 1)
+  p    : {n i : ℕ} {prf : 1 ≤ i} {prf2 : i ≤ n} → PRF {n} (λ ns → proj {n} {i} {prf} {prf2} ns)
+-}
+
+
+data PRF2 : Set → Set where
+  zero : PRF2 (ℕ ^ 0)
+  suc  : ℕ → PRF2 (ℕ)
+  p    : (n i : ℕ) {prf : 1 ≤ i} {prf2 : i ≤ n} → PRF2 (ℕ ^ n)
+
+eval : {f : Set} → PRF2 f → ℕ
+eval zero = nzero
+eval suc = {!!}
+eval (p n i) = {!!}
 
 {-
 record Proj (n : ℕ) : Set where
@@ -32,6 +58,8 @@ Proj (nsuc nzero)    (nsuc nzero)    (s≤s prf) x  = x
 Proj (nsuc nzero)    (nsuc (nsuc i)) (s≤s ())  x
 Proj (nsuc (nsuc n)) (nsuc i)       (s≤s prf) xs = Proj (nsuc n) i prf (proj₂ xs)
 -}
+
+{-
 open import Data.Vec
 
 -- Primitive Recursive Function
@@ -40,8 +68,6 @@ data PRF : ℕ → Set where
   zero : PRF 0
   suc  : ℕ → PRF 1
   proj : {n i : ℕ} → ℕ ^ n → 1 ≤ i → i ≤ n → PRF n
-  -- (2)
-  cmp  : {m n : ℕ} {prf : 1 ≤ m} → PRF m → Vec (PRF n) m → PRF n
 
 
 -- PRFはAgdaの関数ではないので、関数の評価方法を定めないと動かない。(f xと書けない)
@@ -58,7 +84,12 @@ eval (proj {nsuc nzero}    {nsuc (nsuc i)} prod (s≤s z≤n) (s≤s ()))
 eval (proj {nsuc (nsuc n)} {nsuc nzero}    (x , xs) prf1 prf2) = x
 eval (proj {nsuc (nsuc n)} {nsuc (nsuc i)} (x , xs) prf1 (s≤s p))
   = eval (proj {nsuc n} {nsuc i} xs (s≤s z≤n) p)
+
 -- (2)
+cmp  : {m n : ℕ} {prf : 1 ≤ m} → PRF m → Vec (PRF n) m → PRF n
+cmp g gjs = {!!}
+-}
+{-
 eval (cmp {nzero} {_} {()} g gjs)
 eval (cmp {nsuc .0} {nzero} (suc x) (zero ∷ []))          = 1 --eval (suc (eval zero))
 eval (cmp {nsuc .0} {nzero} (suc x) (proj () _ _ ∷ []))
@@ -69,4 +100,4 @@ eval (cmp {nsuc .0} {nzero} (cmp g gjs) (proj x x₁ x₂ ∷ [])) = {!!}
 eval (cmp {nsuc .0} {nzero} (cmp g gjs) (cmp g1 x ∷ [])) = {!!}
 eval (cmp {nsuc _}  {nzero} g (g1 ∷ g2 ∷ g3s)) = {!!}
 eval (cmp {nsuc m} {nsuc n} {prf} g gjs) = {!!}
-
+-}
