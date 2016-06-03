@@ -1,5 +1,5 @@
 module PRF where
--- primitive recursive function
+-- Primitive Recursive Function (PRF)
 -- by K. Takahashi's Book
 
 open import Data.Nat renaming (zero to nzero; suc to nsuc)
@@ -12,7 +12,6 @@ s ^ 0  = ⊥
 s ^ nsuc nzero = s
 s ^ nsuc n     = s × (s ^ n)
 
-
 proj : {n i : ℕ} {prf : 1 ≤ i} {prf2 : i ≤ n} → ℕ ^ n → ℕ
 proj {nzero}  {nzero}  {()} 
 proj {nzero}  {nsuc i} {s≤s prf} {()} 
@@ -21,29 +20,43 @@ proj {nsuc nzero}    {nsuc .0}       {s≤s z≤n} {s≤s z≤n}   n       = n
 proj {nsuc (nsuc n)} {nsuc .0}       {s≤s z≤n} {s≤s z≤n}  (x , xs) = x
 proj {nsuc (nsuc n)} {nsuc (nsuc i)} {s≤s z≤n} {s≤s prf2} (x , xs) = proj {nsuc n} {nsuc i} {s≤s z≤n} {prf2} xs
 
-{-
+data Initial : {n : ℕ} → (ℕ ^ n → ℕ) → Set where
+  zero : Initial {0} (λ ())
+  suc  : Initial {1} (λ n → n + 1)
+  p    : {n i : ℕ} {prf : 1 ≤ i} {prf2 : i ≤ n} → Initial {n} (λ ns → proj {n} {i} {prf} {prf2} ns)
+     
+open import Data.Vec hiding (init)
+open import Data.Bool
+
+extract : {m n : ℕ} → Vec (ℕ ^ n → ℕ) (nsuc m) → ℕ ^ n → ℕ ^ nsuc m
+extract {nzero}  {n} (f ∷ []) x = f x
+extract {nsuc m} {nzero} (f ∷ fs) ()
+extract {nsuc m} {nsuc nzero}    (f ∷ fs) x  = f x  , extract {m} {nsuc nzero} fs x
+extract {nsuc m} {nsuc (nsuc n)} (f ∷ fs) x→ = f x→ , extract {m} {nsuc (nsuc n)} fs x→
+
+comp : {m n : ℕ} (g : ℕ ^ m → ℕ) (gjs : Vec (ℕ ^ n → ℕ) m) → (ℕ ^ n → ℕ)
+comp {nzero}  {nzero}  g gjs = λ ()
+comp {nzero}  {nsuc n} g []  = λ xs → nzero -- temporary
+comp {nsuc m} {nzero}  g gjs = λ ()
+comp {nsuc nzero}    {nsuc n}        g (g1 ∷ [])  x  = g (g1 x)
+comp {nsuc (nsuc m)} {nsuc nzero}    g (g1 ∷ gjs) x  = g (g1 x  , extract {m} {nsuc nzero}    gjs x )
+comp {nsuc (nsuc m)} {nsuc (nsuc n)} g (g1 ∷ gjs) x→ = g (g1 x→ , extract {m} {nsuc (nsuc n)} gjs x→)
+
 data PRF : {n : ℕ} → (ℕ ^ n → ℕ) → Set where
-  zero : PRF {0} (λ ())
-  suc  : PRF {1} (λ n → n + 1)
-  p    : {n i : ℕ} {prf : 1 ≤ i} {prf2 : i ≤ n} → PRF {n} (λ ns → proj {n} {i} {prf} {prf2} ns)
+  init : {x : ℕ} {f : ℕ ^ x → ℕ} → Initial {x} f → PRF {x} f
+  cmp  : {m n : ℕ} {prf : 1 ≤ m}
+         → (g : ℕ ^ m → ℕ) → PRF {m} g
+         → (gjs : Vec (ℕ ^ n → ℕ) m) → {!!}
+         → PRF {n} (comp {m} {n} g gjs)
+         
+{-
+cmp g gjs = {!!}
 -}
 
-
-data PRF : Set → Set where
-  zero : (n : ℕ ^ 0) → PRF (ℕ ^ 0 → ℕ)
-  suc  : (n : ℕ)     → PRF (ℕ → ℕ)
-  p    : (n i : ℕ) {prf : 1 ≤ i} {prf2 : i ≤ n} → (ns : ℕ ^ n) → PRF (ℕ ^ n → ℕ)
-
-eval : {a : Set} → PRF a → ℕ
-eval x = {!!}
-
-open import Data.Vec
-cmp  : {m n : ℕ} {prf : 1 ≤ m} → PRF (ℕ ^ m → ℕ) → Vec (PRF (ℕ ^ n → ℕ)) m → PRF (ℕ ^ n → ℕ)
-cmp g gjs = {!!}
-
+{-
 rec : {n : ℕ} → PRF (ℕ ^ n → ℕ) → PRF (ℕ ^ (n + 2) → ℕ) → PRF (ℕ ^ (n + 1) → ℕ)
 rec g h = {!!}
-
+-}
 
 {-
 Proj : (n : ℕ) → (i : ℕ) → i ≤ n → ℕ ^ n → ℕ 
