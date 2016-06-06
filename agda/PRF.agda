@@ -10,7 +10,7 @@ open import Data.Empty using (⊥)
 _^_ : Set → ℕ → Set
 s ^ 0  = ⊥
 s ^ nsuc nzero = s
-s ^ nsuc n     = s × (s ^ n)
+s ^ nsuc n     = s × (s ^ n) -- (s ^ n) × s ?
 
 proj : {n i : ℕ} {prf : 1 ≤ i} {prf2 : i ≤ n} → ℕ ^ n → ℕ
 proj {nzero}  {nzero}  {()} 
@@ -28,6 +28,7 @@ data Initial : {n : ℕ} → (ℕ ^ n → ℕ) → Set where
 open import Data.Vec hiding (init)
 open import Data.Bool
 
+-- extract functions out of a vector
 extract : {m n : ℕ} → Vec (ℕ ^ n → ℕ) (nsuc m) → ℕ ^ n → ℕ ^ nsuc m
 extract {nzero}  {n} (f ∷ []) x = f x
 extract {nsuc m} {nzero} (f ∷ fs) ()
@@ -42,16 +43,33 @@ comp {nsuc nzero}    {nsuc n}        g (g1 ∷ [])  x  = g (g1 x)
 comp {nsuc (nsuc m)} {nsuc nzero}    g (g1 ∷ gjs) x  = g (g1 x  , extract {m} {nsuc nzero}    gjs x )
 comp {nsuc (nsuc m)} {nsuc (nsuc n)} g (g1 ∷ gjs) x→ = g (g1 x→ , extract {m} {nsuc (nsuc n)} gjs x→)
 
-data PRF : {n : ℕ} → (ℕ ^ n → ℕ) → Set where
-  init : {x : ℕ} {f : ℕ ^ x → ℕ} → Initial {x} f → PRF {x} f
-  cmp  : {m n : ℕ} {prf : 1 ≤ m}
+rec : {n : ℕ} → (ℕ ^ n → ℕ) → (ℕ ^ (nsuc (nsuc n)) → ℕ) → (ℕ ^ (nsuc n) → ℕ)
+rec {0} g h nzero = 0
+rec {0} g h (nsuc x) = 0
+-- since _,_ is left-assoc, we exchange arguments such as (x,0) (x,y+1) -> (0,x) (y+1,x)
+rec {1} g h (     0 , x)              = g x
+rec {1} g h (nsuc y , x)              = h (y , (x , (rec {1} g h (y , x))))
+rec {nsuc (nsuc x)} g h (     0 , xs) = g xs
+rec {nsuc (nsuc x)} g h (nsuc y , xs) = ?
+
+mutual
+  data PRF : {n : ℕ} → (ℕ ^ n → ℕ) → Set where
+    init : {x : ℕ} {f : ℕ ^ x → ℕ} → Initial {x} f → PRF {x} f
+    cmp  : {m n : ℕ} {prf : 1 ≤ m}
          → (g : ℕ ^ m → ℕ) → PRF {m} g
-         → (gjs : Vec (ℕ ^ n → ℕ) m) → {!!}
+         → (gjs : Vec (ℕ ^ n → ℕ) m) → PRFs {n} {m} gjs
          → PRF {n} (comp {m} {n} g gjs)
-         
-{-
-cmp g gjs = {!!}
--}
+    --rec  : 
+
+  -- All functions in Vec are Primitive recursive.
+  data PRFs : {n m : ℕ} → Vec (ℕ ^ n → ℕ) m → Set where
+    base : (x : ℕ) (f : ℕ ^ nsuc x → ℕ)
+           → PRF {nsuc x} f
+           → PRFs {nsuc x} {nsuc nzero} (f ∷ [])
+    step : (x y : ℕ) (f : ℕ ^ nsuc x → ℕ)
+           → (fs : Vec (ℕ ^ nsuc x → ℕ) y)
+           → PRFs {nsuc x} {y} fs
+           → PRFs {nsuc x} {nsuc y} (f ∷ fs)
 
 {-
 rec : {n : ℕ} → PRF (ℕ ^ n → ℕ) → PRF (ℕ ^ (n + 2) → ℕ) → PRF (ℕ ^ (n + 1) → ℕ)
