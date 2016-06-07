@@ -89,16 +89,33 @@ test9 p = λ x → ⊎-elim p (λ x₁ → ¬-elim (×-elim1 x) x₁) (λ x₁ �
 test5 : {A B C : Set} →
         (¬(¬ A) → A) → 
         (¬ B → ¬ A) → (A → B)
-{-
-test5 : {A B C : Set} →
-        (¬(¬ A) → A) → 
-        (¬ B → ¬ A) →
-        A →
-        B
--}
-test5 {A} {B} {C} dne c a = ⊎-elim (→-to-⊎ c)
-                             {!!}
-                             (λ ¬a → ⊥-elim (¬-elim a ¬a))
+test5 {A} {B} {C} dne c a = {!!} -- これは解けないと思われる
+
+test5' : {A B : Set} → ((X : Set) → (¬(¬ X) → X)) → 
+         (¬ B → ¬ A) → (A → B)
+test5' {A} {B} dne ¬b→¬a a = dne B ((lemma ¬b→¬a) a)
   where
-    →-to-⊎ : {X Y : Set} → (X → Y) → ¬ X ⊎ Y
-    →-to-⊎ {X} {Y} f = {!!}
+    lemma : {A B : Set} → (A → ¬ B) → (B → ¬ A)
+    lemma a→¬b b a = ⊥-elim (¬-elim b (a→¬b a))
+
+{- 苦闘の記録
+→-to-⊎ : {X Y : Set} → (X → Y) → ¬ X ⊎ Y
+→-to-⊎ {X} {Y} f = {!!}
+
+→-to-⊎2 : {Y : Set} → (⊥ → Y) → ¬ ⊥ ⊎ Y
+→-to-⊎2 {Y} f = inj₁ (λ bot → bot)
+
+→-to-⊎3 : {X Y : Set} {x : X} → (X → Y) → ¬ X ⊎ Y
+→-to-⊎3 {X}{Y}{x} f = inj₂ (f x)
+
+
+⊎-to-→ : {X Y : Set} → ¬ X ⊎ Y → (X → Y)
+⊎-to-→ (inj₁ ¬x) x = ⊥-elim (¬-elim x ¬x)
+⊎-to-→ (inj₂  y) x = y
+
+inj₁-dne : {A X : Set} → ¬ ¬ A ⊎ X → (¬ ¬ A → A) → A ⊎ X
+inj₁-dne (inj₁ nna) dne = inj₁ (dne nna)
+inj₁-dne (inj₂   x) dne = inj₂ x
+-}
+
+
