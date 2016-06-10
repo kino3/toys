@@ -5,28 +5,18 @@ module PRF where
 open import Data.Nat renaming (zero to nzero; suc to nsuc)
 open import Data.Product
 open import Data.Empty using (⊥)
+open import Data.Vec
+open import Data.Fin using (Fin)
 
--- cartesian product
+-- Vec can be seen as cartesian product 
 _^_ : Set → ℕ → Set
-s ^ 0  = ⊥
-s ^ nsuc nzero = s
-s ^ nsuc n     = s × (s ^ n) -- (s ^ n) × s ?
-
-proj : {n i : ℕ} {prf : 1 ≤ i} {prf2 : i ≤ n} → ℕ ^ n → ℕ
-proj {nzero}  {nzero}  {()} 
-proj {nzero}  {nsuc i} {s≤s prf} {()} 
-proj {nsuc n} {nzero}  {()}
-proj {nsuc nzero}    {nsuc .0}       {s≤s z≤n} {s≤s z≤n}   n       = n
-proj {nsuc (nsuc n)} {nsuc .0}       {s≤s z≤n} {s≤s z≤n}  (x , xs) = x
-proj {nsuc (nsuc n)} {nsuc (nsuc i)} {s≤s z≤n} {s≤s prf2} (x , xs) = proj {nsuc n} {nsuc i} {s≤s z≤n} {prf2} xs
+s ^ n = Vec s n
 
 data Initial : {n : ℕ} → (ℕ ^ n → ℕ) → Set where
-  zero : Initial {0} (λ ())
-  suc  : Initial {1} (λ n → n + 1)
-  p    : {n i : ℕ} {prf : 1 ≤ i} {prf2 : i ≤ n} → Initial {n} (λ ns → proj {n} {i} {prf} {prf2} ns)
+  zero : Initial {0} (λ x → 0)
+  suc  : Initial {1} (λ {(n ∷ []) → nsuc n})
+  p    : {n : ℕ} {i : Fin (nsuc n)} → Initial {nsuc n} (λ ns → lookup i ns)
      
-open import Data.Vec hiding (init)
-open import Data.Bool
 
 -- extract functions out of a vector
 extract : {m n : ℕ} → Vec (ℕ ^ n → ℕ) (nsuc m) → ℕ ^ n → ℕ ^ nsuc m
@@ -43,24 +33,22 @@ comp {nsuc nzero}    {nsuc n}        g (g1 ∷ [])  x  = g (g1 x)
 comp {nsuc (nsuc m)} {nsuc nzero}    g (g1 ∷ gjs) x  = g (g1 x  , extract {m} {nsuc nzero}    gjs x )
 comp {nsuc (nsuc m)} {nsuc (nsuc n)} g (g1 ∷ gjs) x→ = g (g1 x→ , extract {m} {nsuc (nsuc n)} gjs x→)
 
-rec : {n : ℕ} → (ℕ ^ n → ℕ) → (ℕ ^ (nsuc (nsuc n)) → ℕ) → (ℕ ^ (nsuc n) → ℕ)
-rec {0} g h nzero = 0
-rec {0} g h (nsuc x) = 0
--- since _,_ is left-assoc, we exchange arguments such as (x,0) (x,y+1) -> (0,x) (y+1,x)
-rec {1} g h (     0 , x)              = g x
-rec {1} g h (nsuc y , x)              = ? --h (y , x , rec {1} g h (y , x))
-rec {nsuc (nsuc x)} g h (     0 , xs) = g xs
-rec {nsuc (nsuc x)} g h (nsuc y , xs) = {!!}
+
+rec' : {n : ℕ} → (ℕ ^ n → ℕ) → (ℕ ^ (nsuc (nsuc n)) → ℕ) → (ℕ ^ (nsuc n) → ℕ)
+rec' g h = {!!}
 
 mutual
   data PRF : {n : ℕ} → (ℕ ^ n → ℕ) → Set where
-    init : {x : ℕ} {f : ℕ ^ x → ℕ} → Initial {x} f → PRF {x} f
-    cmp  : {m n : ℕ} {prf : 1 ≤ m}
+    ini : {x : ℕ} {f : ℕ ^ x → ℕ} → Initial {x} f → PRF {x} f
+    cmp : {m n : ℕ} {prf : 1 ≤ m}
          → (g : ℕ ^ m → ℕ) → PRF {m} g
          → (gjs : Vec (ℕ ^ n → ℕ) m) → PRFs {n} {m} gjs
-         → PRF {n} (comp {m} {n} g gjs)
-    --rec  : 
-
+         → PRF {n} {!!}
+    rec  : {n : ℕ}
+         → (g : ℕ ^ n → ℕ) → PRF {n} g
+         → (h : ℕ ^ (nsuc (nsuc n)) → ℕ) → PRF {(nsuc (nsuc n))} h
+         → PRF {nsuc n} (rec' {n} g h)
+         
   -- All functions in Vec are Primitive recursive.
   data PRFs : {n m : ℕ} → Vec (ℕ ^ n → ℕ) m → Set where
     base : (x : ℕ) (f : ℕ ^ nsuc x → ℕ)
@@ -70,4 +58,5 @@ mutual
            → (fs : Vec (ℕ ^ nsuc x → ℕ) y)
            → PRFs {nsuc x} {y} fs
            → PRFs {nsuc x} {nsuc y} (f ∷ fs)
+
 
