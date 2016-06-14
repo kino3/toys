@@ -3,8 +3,6 @@ module PRF where
 -- by K. Takahashi's Book
 
 open import Data.Nat renaming (zero to nzero; suc to nsuc)
-open import Data.Product
-open import Data.Empty using (⊥)
 open import Data.Vec
 open import Data.Fin using (Fin)
 
