@@ -16,23 +16,6 @@ data Initial : {n : ℕ} → (ℕ ^ n → ℕ) → Set where
   zero : Initial {0} (λ x → 0)
   suc  : Initial {1} (λ {(n ∷ []) → nsuc n})
   p    : {n : ℕ} {i : Fin (nsuc n)} → Initial {nsuc n} (λ ns → lookup i ns)
-     
-
--- extract functions out of a vector
-extract : {m n : ℕ} → Vec (ℕ ^ n → ℕ) (nsuc m) → ℕ ^ n → ℕ ^ nsuc m
-extract {nzero}  {n} (f ∷ []) x = f x
-extract {nsuc m} {nzero} (f ∷ fs) ()
-extract {nsuc m} {nsuc nzero}    (f ∷ fs) x  = f x  , extract {m} {nsuc nzero} fs x
-extract {nsuc m} {nsuc (nsuc n)} (f ∷ fs) x→ = f x→ , extract {m} {nsuc (nsuc n)} fs x→
-
-comp : {m n : ℕ} (g : ℕ ^ m → ℕ) (gjs : Vec (ℕ ^ n → ℕ) m) → (ℕ ^ n → ℕ)
-comp {nzero}  {nzero}  g gjs = λ ()
-comp {nzero}  {nsuc n} g []  = λ xs → nzero -- temporary
-comp {nsuc m} {nzero}  g gjs = λ ()
-comp {nsuc nzero}    {nsuc n}        g (g1 ∷ [])  x  = g (g1 x)
-comp {nsuc (nsuc m)} {nsuc nzero}    g (g1 ∷ gjs) x  = g (g1 x  , extract {m} {nsuc nzero}    gjs x )
-comp {nsuc (nsuc m)} {nsuc (nsuc n)} g (g1 ∷ gjs) x→ = g (g1 x→ , extract {m} {nsuc (nsuc n)} gjs x→)
-
 
 rec' : {n : ℕ} → (ℕ ^ n → ℕ) → (ℕ ^ (nsuc (nsuc n)) → ℕ) → (ℕ ^ (nsuc n) → ℕ)
 rec' g h = {!!}
@@ -43,7 +26,7 @@ mutual
     cmp : {m n : ℕ} {prf : 1 ≤ m}
          → (g : ℕ ^ m → ℕ) → PRF {m} g
          → (gjs : Vec (ℕ ^ n → ℕ) m) → PRFs {n} {m} gjs
-         → PRF {n} {!!}
+         → PRF {n} (λ xs → g (gjs ⊛ replicate xs)) 
     rec  : {n : ℕ}
          → (g : ℕ ^ n → ℕ) → PRF {n} g
          → (h : ℕ ^ (nsuc (nsuc n)) → ℕ) → PRF {(nsuc (nsuc n))} h
