@@ -15,8 +15,7 @@ data Initial : {n : ℕ} → (ℕ ^ n → ℕ) → Set where
   suc  : Initial {1} (λ {(n ∷ []) → nsuc n})
   p    : {n : ℕ} {i : Fin (nsuc n)} → Initial {nsuc n} (λ ns → lookup i ns)
 
-rec' : {n : ℕ} → (ℕ ^ n → ℕ) → (ℕ ^ (nsuc (nsuc n)) → ℕ) → (ℕ ^ (nsuc n) → ℕ)
-rec' g h = {!!}
+--FIXME : need assumption that g,h is PRF
 
 mutual
   data PRF : {n : ℕ} → (ℕ ^ n → ℕ) → Set where
@@ -26,9 +25,9 @@ mutual
          → (gjs : Vec (ℕ ^ n → ℕ) m) → PRFs {n} {m} gjs
          → PRF {n} (λ xs → g (gjs ⊛ replicate xs)) 
     rec  : {n : ℕ}
-         → (g : ℕ ^ n → ℕ) → PRF {n} g
-         → (h : ℕ ^ (nsuc (nsuc n)) → ℕ) → PRF {(nsuc (nsuc n))} h
-         → PRF {nsuc n} (rec' {n} g h)
+         → (g : ℕ ^ n → ℕ) → (prfg : PRF {n} g)
+         → (h : ℕ ^ (nsuc (nsuc n)) → ℕ) → (prfh : PRF {(nsuc (nsuc n))} h)
+         → PRF {nsuc n} (rec' {n} g prfg h prfh)
          
   -- All functions in Vec are Primitive recursive.
   data PRFs : {n m : ℕ} → Vec (ℕ ^ n → ℕ) m → Set where
@@ -39,5 +38,11 @@ mutual
            → (fs : Vec (ℕ ^ nsuc x → ℕ) y)
            → PRFs {nsuc x} {y} fs
            → PRFs {nsuc x} {nsuc y} (f ∷ fs)
+
+  rec' : {n : ℕ} → (g : ℕ ^ n → ℕ) → PRF g → (h : ℕ ^ (2 + n) → ℕ) → PRF h → (ℕ ^ (nsuc n) → ℕ) 
+  rec' {nzero}  g prfg h prfh xs = nzero
+  rec' {nsuc n} g prfg h prfh xs with last xs
+  rec' {nsuc n} g prfg h prfh xs       | nzero  = {!!} --g (init xs)
+  rec' {nsuc n} g prfg h prfh (x ∷ xs) | nsuc y = {!!} --h (init (x ∷ xs) ∷ʳ y ∷ʳ rec' g prfg h prfh (x ∷ xs))
 
 
