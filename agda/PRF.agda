@@ -9,22 +9,28 @@ open import Relation.Nullary using (yes;no)
 
 -- 定義1.3.1
 
--- FIXME: change n to ℕ ^ n
-data PRF : ℕ → Set where
+_^_ : Set → ℕ → Set
+X ^ n = Vec X n
+
+data PRF : Set → Set where
   -- (1)
-  zero : PRF 0
-  suc  : PRF 1
-  p    : (n : ℕ) (i : ℕ) {p1 : 1 ≤ i} {p2 : i ≤ n} → PRF n
+  zero : PRF (ℕ ^ 0)
+  suc  : ℕ → PRF (ℕ ^ 1)
+  p    : (n : ℕ) (i : ℕ) {p1 : 1 ≤ i} {p2 : i ≤ n} → ℕ ^ n → PRF (ℕ ^ n)
   -- (2)
   cmp  : {m n : ℕ} {prf : 1 ≤ m}
-         → PRF m → Vec (PRF n) m → PRF n
+         → PRF (ℕ ^ m) → Vec (PRF ℕ ^ n) m → PRF (ℕ ^ n)
   -- (3)
-  rec  : {n : ℕ} → PRF n → PRF (2 + n) → PRF (1 + n) 
+  rec  : {n : ℕ} → PRF (ℕ ^ n) → PRF (ℕ ^ (2 + n)) → PRF (ℕ ^ (1 + n)) 
 
 -- FIXME: change apply to eval
 -- function application 
+
 {-# NON_TERMINATING #-}
-_[_] : {n : ℕ} → PRF n → Vec ℕ n → ℕ
+_[_] : {n : ℕ} → PRF (ℕ ^ n) → Vec ℕ n → ℕ
+f [ xs ] = {!!}
+
+{-
 zero [ [] ]     = nzero
 suc  [ x ∷ [] ] = nsuc x
 p       _        0  {()} {_}  [ xs ] 
@@ -42,13 +48,14 @@ cmp {nsuc m} {n} {prf} g gj [ xs ] = g [ map (_[ xs ]) gj ]
 rec g h [ xs ] with last xs
 rec g h [ xs ] | nzero  = g [ init xs ]
 rec g h [ xs ] | nsuc y = h [ (init xs) ∷ʳ y ∷ʳ (rec g h [ init xs ∷ʳ y ]) ]
-
+-}
+{-
 one : PRF 0
 one = cmp {prf = s≤s z≤n} suc (zero ∷ [])
 
 pred : PRF 1
 pred = rec {!!} (p 2 1) --rec {!!} (p 2 {s≤s z≤n})
-
+-}
 
 
 {-
