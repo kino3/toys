@@ -5,32 +5,51 @@ module PRF where
 
 open import Data.Nat renaming (zero to nzero; suc to nsuc) hiding (pred)
 open import Data.Vec hiding ([_])
+open import Relation.Nullary using (yes;no)
 
 -- 定義1.3.1
+
+-- FIXME: change n to ℕ ^ n
 data PRF : ℕ → Set where
   -- (1)
   zero : PRF 0
   suc  : PRF 1
-  p    : (n : ℕ) {prf : 1 ≤ n} → PRF n
+  p    : (n : ℕ) (i : ℕ) {p1 : 1 ≤ i} {p2 : i ≤ n} → PRF n
   -- (2)
-  cmp  : {m n j : ℕ} {prf1 : 1 ≤ j} {prf2 : j ≤ m}
-         → PRF m → Vec (PRF n) j → PRF n
+  cmp  : {m n : ℕ} {prf : 1 ≤ m}
+         → PRF m → Vec (PRF n) m → PRF n
   -- (3)
+  rec  : {n : ℕ} → PRF n → PRF (2 + n) → PRF (1 + n) 
 
--- function application
+-- FIXME: change apply to eval
+-- function application 
 {-# NON_TERMINATING #-}
 _[_] : {n : ℕ} → PRF n → Vec ℕ n → ℕ
 zero [ [] ]     = nzero
 suc  [ x ∷ [] ] = nsuc x
+p       _        0  {()} {_}  [ xs ] 
+p       0  (nsuc i) {_}  {()} [ xs ]
+p (nsuc n) (nsuc nzero)    {s≤s z≤n} {s≤s p2} [ x ∷ xs ] = x
+p (nsuc n) (nsuc (nsuc i)) {s≤s z≤n} {s≤s p2} [ x ∷ xs ] = p n (nsuc i) {s≤s z≤n} {p2} [ xs ]
+
+{-
 p nzero {()} [ xs ]
 p (nsuc nzero)    {s≤s prf} [ x ∷ xs ] = x
 p (nsuc (nsuc n)) {s≤s prf} [ x ∷ xs ] = (p (nsuc n) {s≤s z≤n}) [ xs ]
-cmp {_}     {_} {nzero}  {()}       {_}  g gj [ _ ]
-cmp {nzero} {_} {nsuc j} {s≤s prf1} {()} g gj [ _ ]
-cmp {nsuc nzero}    {0} {nsuc .0} {s≤s z≤n} {s≤s z≤n} g (g1 ∷ []) [ xs ] =  g [ (g1 [ xs ]) ∷ [] ]
-cmp {nsuc (nsuc m)} {0} {nsuc j}  {s≤s p1}  {s≤s p2}  g (g1 ∷ gj) [ xs ] = g [ (g1 [ xs ]) ∷ {!!} ]
-cmp {nsuc nzero} {nsuc n} {nsuc .0} {s≤s z≤n} {s≤s z≤n} g (g1 ∷ []) [ xs ] = g [ (g1 [ xs ]) ∷ [] ]
-cmp {nsuc (nsuc m)} {nsuc n} {nsuc j} {s≤s prf1} {s≤s prf2} g gj [ xs ] = g [ {!!} ]
+-}
+cmp {nzero}  {_} {()}  g gj [ xs ] 
+cmp {nsuc m} {n} {prf} g gj [ xs ] = g [ map (_[ xs ]) gj ]
+rec g h [ xs ] with last xs
+rec g h [ xs ] | nzero  = g [ init xs ]
+rec g h [ xs ] | nsuc y = h [ (init xs) ∷ʳ y ∷ʳ (rec g h [ init xs ∷ʳ y ]) ]
+
+one : PRF 0
+one = cmp {prf = s≤s z≤n} suc (zero ∷ [])
+
+pred : PRF 1
+pred = rec {!!} (p 2 1) --rec {!!} (p 2 {s≤s z≤n})
+
+
 
 {-
 {-# NON_TERMINATING #-}
