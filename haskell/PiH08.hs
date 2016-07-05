@@ -154,3 +154,135 @@ eval xs = case parse expr xs of
 -- 1
 int :: Parser Int
 int = ((char '-') >>= \_ -> nat >>= \n -> return (-n)) +++ nat
+
+-- 2
+comment :: Parser String
+comment = (string "--" ) >>= \x -> (many1 (char '\n' +++ item)) >>= \y -> return (x ++ y)
+
+-- 3,4 omit
+
+-- 5 brief. term * 2 -> term * 1
+
+-- 6
+expr6 :: Parser Int
+expr6 = term6 >>= \t ->
+          ((symbol "+" >>= \_ ->
+            expr6      >>= \e ->
+            return (t + e))
+           +++
+           (symbol "-" >>= \_ ->
+            expr6      >>= \e ->
+            return (t - e)) 
+           +++
+           return t
+          )
+
+term6 :: Parser Int
+term6 = factor6 >>= \f ->
+          ((symbol "*" >>= \_ ->
+            term6      >>= \t ->
+            return (f * t))
+           +++
+           (symbol "/" >>= \_ ->
+            term6      >>= \t ->
+            return (f `div` t))
+           +++
+           return f
+          )
+
+factor6 :: Parser Int
+factor6 = (symbol "(" >>= \_ ->
+           expr6       >>= \e ->
+           symbol ")" >>= \_ ->
+           return e)
+          +++
+          natural
+
+eval6 :: String -> Int
+eval6 xs = case parse expr6 xs of
+             [(n, [])]  -> n
+             [(_, out)] -> error ("unused input: " ++ out)
+             []         -> error "invalid input"
+
+-- 7
+expr7 :: Parser Int
+expr7 = term7 >>= \t ->
+          ((symbol "+" >>= \_ ->
+            expr7      >>= \e ->
+            return (t + e))
+           +++
+           (symbol "-" >>= \_ ->
+            expr7      >>= \e ->
+            return (t - e)) 
+           +++
+           return t
+          )
+
+term7 :: Parser Int
+term7 = term'7 >>= \f ->
+          ((symbol "*" >>= \_ ->
+            term7      >>= \t ->
+            return (f * t))
+           +++
+           (symbol "/" >>= \_ ->
+            term7      >>= \t ->
+            return (f `div` t))
+           +++
+           return f
+          )
+
+term'7 :: Parser Int
+term'7 = factor7 >>= \f ->
+          ((symbol "^" >>= \_ ->
+            term'7     >>= \t ->
+            return (f ^ t))
+           +++
+           return f
+          )
+
+factor7 :: Parser Int
+factor7 = (symbol "(" >>= \_ ->
+           expr7       >>= \e ->
+           symbol ")" >>= \_ ->
+           return e)
+          +++
+          natural
+
+eval7 :: String -> Int
+eval7 xs = case parse expr7 xs of
+             [(n, [])]  -> n
+             [(_, out)] -> error ("unused input: " ++ out)
+             []         -> error "invalid input"
+
+
+-- 8
+{-
+8.a
+
+expr   ::= expr '-' factor | factor
+factor ::= '(' expr ')' | nat
+nat    ::= '0' | '1' | '2' | ...
+
+-}
+
+             
+expr8 :: Parser Int
+expr8 = (expr8      >>= \e ->
+         symbol "-" >>= \_ ->
+         factor8    >>= \f -> return (e - f))
+        +++
+        factor8     >>= \f -> return f 
+        
+factor8 :: Parser Int
+factor8 = (symbol "(" >>= \_ ->
+           expr8      >>= \e ->
+           symbol ")" >>= \_ ->
+           return e)
+          +++
+          natural
+
+eval8 :: String -> Int
+eval8 xs = case parse expr8 xs of
+             [(n, [])]  -> n
+             [(_, out)] -> error ("unused input: " ++ out)
+             []         -> error "invalid input"
