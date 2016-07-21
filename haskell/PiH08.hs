@@ -265,7 +265,7 @@ nat    ::= '0' | '1' | '2' | ...
 
 -}
 
-             
+-- can't stop ...             
 expr8 :: Parser Int
 expr8 = (expr8      >>= \e ->
          symbol "-" >>= \_ ->
@@ -283,6 +283,28 @@ factor8 = (symbol "(" >>= \_ ->
 
 eval8 :: String -> Int
 eval8 xs = case parse expr8 xs of
+             [(n, [])]  -> n
+             [(_, out)] -> error ("unused input: " ++ out)
+             []         -> error "invalid input"
+
+-- 8.d.
+factor8' :: Parser Int
+factor8' = (symbol "(" >>= \_ ->
+            expr8'     >>= \e ->
+            symbol ")" >>= \_ ->
+           return e)
+          +++
+          natural
+
+expr8' :: Parser Int
+expr8' =  factor8' >>= \f ->
+          many (symbol "-" >>= \_ ->
+                factor8'   >>= \f -> return f)
+                   >>= \fs ->
+          return (f + ((foldl (-) 0) fs))
+  
+eval8' :: String -> Int
+eval8' xs = case parse expr8' xs of
              [(n, [])]  -> n
              [(_, out)] -> error ("unused input: " ++ out)
              []         -> error "invalid input"
