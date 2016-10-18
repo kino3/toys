@@ -14,3 +14,18 @@ remove-lst : {A : Set} → List (List A) → ℕ → ℕ → List (List A)
 remove-lst [] i j                   = []
 remove-lst (first ∷ rest) zero j    = remove first j ∷ rest
 remove-lst (first ∷ rest) (suc i) j = first ∷ remove-lst rest i j
+
+open import Data.Unit
+open import Data.Empty
+
+exists : {A : Set} → List A → ℕ → Set
+exists []       n       = ⊥
+exists (x ∷ xs) zero    = ⊤
+exists (x ∷ xs) (suc n) = exists xs n
+
+get : {A : Set} → List A → ℕ → A
+get = {!!}
+
+remove-lst' : {A : Set} → (lst : List (List A)) → (i : ℕ) → (j : ℕ)
+  → i N.≤ length lst  → exists (get lst i) j → List (List A)
+remove-lst' lst i j prf1 prf2 = {!!}
