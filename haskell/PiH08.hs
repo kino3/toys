@@ -159,6 +159,10 @@ int = ((char '-') >>= \_ -> nat >>= \n -> return (-n)) +++ nat
 comment :: Parser String
 comment = (string "--" ) >>= \x -> (many1 (char '\n' +++ item)) >>= \y -> return (x ++ y)
 
+comment' :: Parser ()
+comment' = (string "--") >>= \_ -> (many (alphanum +++ (char ' ') +++ (char '\t'))) >>= \_ -> char '\n' >>= \_ -> return ()
+
+
 -- 3,4 omit
 
 -- 5 brief. term * 2 -> term * 1
