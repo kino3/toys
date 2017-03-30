@@ -42,3 +42,7 @@ applyP (cmp g gjs)   = applyP g Fun.∘ applyP' gjs
 applyP (rec g h) (N.zero  ∷ xs) = applyP g xs
 applyP (rec g h) (N.suc x ∷ xs) = applyP h (x ∷ applyP (rec g h) (x ∷ xs) ∷ xs)
 
+one : PRF 0
+one = cmp (ini suc) (ini zero ∷ [])
+
+
